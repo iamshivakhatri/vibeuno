@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, BarChart3, Target, Shield } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { LucideIcon } from "lucide-react";
+
 
 export default function LandingPage() {
   return (
@@ -114,7 +116,8 @@ export default function LandingPage() {
   );
 }
 
-function FeatureCard({ icon: Icon, title, description }) {
+
+function FeatureCard({ icon: Icon, title, description }: { icon: LucideIcon; title: string; description: string }) {
   return (
     <div className="flex flex-col items-center text-center p-6 rounded-lg shadow-md bg-white hover:shadow-lg">
       <div className="flex items-center justify-center h-16 w-16 rounded-full bg-pink-100 text-pink-500">
