@@ -33,18 +33,23 @@ export function PlaceGrid({ state }: PlaceGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+    <div
+      className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-6"
+    >
       {places.map((place) => (
-        <PlaceCard key={place.id} place={{
-          id: place.id,
-          name: place.name,
-          description: place.description || '',
-          imageUrl: place.imageUrl || '',
-          _count: {
-            votes: 0 // Default value since it's missing from Place type
-          },
-          city: place.city
-        }} />
+        <PlaceCard
+          key={place.id}
+          place={{
+            id: place.id,
+            name: place.name,
+            description: place.description || '',
+            imageUrl: place.imageUrl || '',
+            _count: {
+              votes: 0, // Default value since it's missing from Place type
+            },
+            city: place.city,
+          }}
+        />
       ))}
     </div>
   );
