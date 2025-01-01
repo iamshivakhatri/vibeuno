@@ -3,10 +3,26 @@
 import { PlaceCard } from './place-card';
 import { useEffect, useState } from 'react';
 import { getPlaces } from '@/actions/place';
-import { Place } from '@prisma/client';
+// import { Place } from '@prisma/client';
 
 interface PlaceGridProps {
   state: string;
+}
+
+type Place = {
+  state: string;
+  name: string;
+  id: string;
+  description: string | null;
+  city: string;
+  category: string;
+  imageUrl: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+  _count: {
+    votes: number;
+  };
 }
 
 export function PlaceGrid({ state }: PlaceGridProps) {
@@ -17,6 +33,7 @@ export function PlaceGrid({ state }: PlaceGridProps) {
     async function loadPlaces() {
       try {
         const data = await getPlaces(state);
+        console.log('Places after pulling:', data);
         setPlaces(data);
       } catch (error) {
         console.error('Error loading places:', error);
@@ -45,7 +62,7 @@ export function PlaceGrid({ state }: PlaceGridProps) {
             description: place.description || '',
             imageUrl: place.imageUrl || '',
             _count: {
-              votes: 0, // Default value since it's missing from Place type
+              votes: place._count.votes || 0,
             },
             city: place.city,
           }}

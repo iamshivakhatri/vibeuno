@@ -37,10 +37,17 @@ export function PlaceCard({ place }: PlaceCardProps) {
     if (!hasVoted && !isVoting) {
       setIsVoting(true);
       try {
-        await voteForPlace(place.id, user.id);
-        setVotes(prev => prev + 1);
-        setHasVoted(true);
-        toast({ title: "Vote recorded!" });
+        const voteCount = await voteForPlace(place.id, user.id);
+        console.log('Vote:', voteCount); 
+        setVotes(voteCount.vote);
+        if(voteCount.vote == 1) {
+          toast({ title: "Vote recorded!" });
+        }else{
+          toast({ title: "Vote removed!" });
+        }
+
+
+
       } catch (error) {
         toast({ title: "Failed to vote", variant: "destructive" });
       } finally {

@@ -56,17 +56,45 @@ export async function getPlaces(state: string) {
   });
 }
 
-export async function voteForPlace(placeId: string, userId: string) {
-  try {
+// export async function voteForPlace(placeId: string, userId: string) {
+//   try {
 
-    console.log('Voting for place:', { placeId, userId });
-    // Check if the user exists
-    const user = await prisma.user.findUnique({
-      where: { clerkId: userId }
-    });
+//     console.log('Voting for place:', { placeId, userId });
+//     // Check if the user exists
+//     const user = await prisma.user.findUnique({
+//       where: { clerkId: userId }
+//     });
 
 
     
+
+//     if (!user) {
+//       throw new Error('User not found');
+//     }
+
+//     console.log('User:', user.id);
+
+//     // Proceed with creating the vote if the user exists
+//     return await prisma.vote.create({
+//       data: {
+//         placeId,
+//         userId:user.id
+//       }
+//     });
+//   } catch (error) {
+//     console.error('Error voting for place:', error);
+//     throw new Error('Unable to vote for place');
+//   }
+// }
+
+export async function voteForPlace(placeId: string, userId: string) {
+  try {
+    console.log('Voting for place:', { placeId, userId });
+
+    // Check if the user exists
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
 
     if (!user) {
       throw new Error('User not found');
@@ -74,18 +102,42 @@ export async function voteForPlace(placeId: string, userId: string) {
 
     console.log('User:', user.id);
 
-    // Proceed with creating the vote if the user exists
-    return await prisma.vote.create({
-      data: {
-        placeId,
-        userId:user.id
-      }
+    // Check if the vote already exists
+    const existingVote = await prisma.vote.findUnique({
+      where: {
+        placeId_userId: {
+          placeId,
+          userId: user.id,
+        },
+      },
     });
+
+    if (existingVote) {
+      // Vote exists, so remove the upvote by deleting the record
+      await prisma.vote.delete({
+        where: {
+          id: existingVote.id,
+        },
+      });
+      console.log('Vote removed successfully');
+      return { status: 200, vote: 0 };
+    } else {
+      // No vote exists, so create a new upvote
+      const newVote = await prisma.vote.create({
+        data: {
+          placeId,
+          userId: user.id,
+        },
+      });
+      console.log('Vote added successfully');
+      return { status: 200, vote: 1 };
+    }
   } catch (error) {
     console.error('Error voting for place:', error);
     throw new Error('Unable to vote for place');
   }
 }
+
 
 
 
