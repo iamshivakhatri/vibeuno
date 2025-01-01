@@ -1,6 +1,7 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext } from 'react';
+import { useUser } from '@clerk/nextjs';
 
-// Simplified auth for demo - in production use NextAuth.js or similar
+// Define the user type
 export type User = {
   id: string;
   email: string;
@@ -9,14 +10,40 @@ export type User = {
 
 type AuthContextType = {
   user: User | null;
-  login: (email: string) => void;
-  logout: () => void;
+  login: () => void; // Placeholder; login handled by Clerk's <SignInButton>
+  logout: () => void; // Placeholder; logout handled by Clerk's <UserButton>
 };
 
+// Create the context with default values
 export const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: () => {},
-  logout: () => {},
+  login: () => {}, // Clerk handles login via its components
+  logout: () => {}, // Clerk handles logout via its components
 });
 
-export const useAuth = () => useContext(AuthContext);
+// Hook to use the AuthContext
+export const useAuth = () => {
+  const { user, isSignedIn } = useUser();
+
+  const authUser = isSignedIn
+    ? {
+        id: user?.id || '',
+        email: user?.primaryEmailAddress?.emailAddress || '',
+        name: user?.fullName || '',
+      }
+    : null;
+
+  const login = () => {
+    console.log('Use Clerk components like <SignInButton> for login.');
+  };
+
+  const logout = () => {
+    console.log('Use Clerk components like <UserButton> for logout.');
+  };
+
+  return {
+    user: authUser,
+    login,
+    logout,
+  };
+};

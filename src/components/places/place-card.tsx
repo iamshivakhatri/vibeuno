@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp } from 'lucide-react';
 import { useState } from 'react';
-import { voteForPlace } from '@/lib/places';
+import { voteForPlace } from '@/actions/place';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
@@ -22,6 +22,8 @@ interface PlaceCardProps {
 
 export function PlaceCard({ place }: PlaceCardProps) {
   const { user } = useAuth();
+  console.log('User:', user?.id);
+  console.log('Place:', place);
   const [votes, setVotes] = useState(place._count.votes);
   const [hasVoted, setHasVoted] = useState(false);
   const [isVoting, setIsVoting] = useState(false);

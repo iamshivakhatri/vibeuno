@@ -7,7 +7,7 @@ export async function addPlace(formData: {
   name: string;
   description: string;
   imageUrl: string;
-  userId: string;
+  clerkId?: string;  // clerkId is received as input
   state: string;
   city: string;
   category: string;
@@ -15,18 +15,34 @@ export async function addPlace(formData: {
   try {
     console.log("Form Data:", formData); // Debugging: Log the form data
 
-    const place = await prisma.place.create({
-      data: formData
+    // Fetch user based on clerkId
+    const user = await prisma.user.findUnique({
+      where: { clerkId: formData.clerkId }
     });
 
-    console.log("Place Created:", place); // Debugging: Log the created place
+    if (!user) {
+      throw new Error("User not found for the provided clerkId");
+    }
 
-    return { success: true, data: place };
+    // Remove clerkId from formData and add the userId to create the new place
+    const newData = { ...formData, userId: user.id };
+    delete newData.clerkId; // Optionally remove clerkId if it's in the formData
+
+    console.log("New Data:", newData); // Debugging: Log the modified data
+
+    // Create the place
+    const place = await prisma.place.create({
+      data: newData // Use the modified data with userId
+    });
+
+    console.log("Place added:", place);
+    return place;
   } catch (error) {
-    console.error('Error adding place:', error); // Log the error message
-    return { success: false, error: error|| 'Failed to add place' };
+    console.error("Error adding place:", error);
+    throw error;
   }
 }
+
 
 export async function getPlaces(state: string) {
   return prisma.place.findMany({
@@ -41,10 +57,35 @@ export async function getPlaces(state: string) {
 }
 
 export async function voteForPlace(placeId: string, userId: string) {
-  return prisma.vote.create({
-    data: {
-      placeId,
-      userId
+  try {
+
+    console.log('Voting for place:', { placeId, userId });
+    // Check if the user exists
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId }
+    });
+
+
+    
+
+    if (!user) {
+      throw new Error('User not found');
     }
-  });
+
+    console.log('User:', user.id);
+
+    // Proceed with creating the vote if the user exists
+    return await prisma.vote.create({
+      data: {
+        placeId,
+        userId:user.id
+      }
+    });
+  } catch (error) {
+    console.error('Error voting for place:', error);
+    throw new Error('Unable to vote for place');
+  }
 }
+
+
+

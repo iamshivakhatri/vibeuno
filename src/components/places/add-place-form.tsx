@@ -10,13 +10,19 @@ import { addPlace } from '@/actions/place';
 import { useRouter } from 'next/navigation';
 import { US_STATES } from '@/lib/states';
 import { toast } from '@/hooks/use-toast';
+import { useUser } from '@clerk/nextjs';
 
 export function AddPlaceForm() {
   const router = useRouter();
+  const { isSignedIn, user } = useUser();
+
+  console.log('User:', user);
+  if (!isSignedIn) {
+    router.push('/sign-in');
+  }
   // const { user } = useAuth(); // Commented out for now, you will replace it with Clerk later.
   
   // For now, using a hardcoded user ID (replace it with Clerk later)
-  const user = { id: 'cm5arfdhb0000rpvgmzygckb2' };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -40,7 +46,7 @@ export function AddPlaceForm() {
     setIsSubmitting(true);
     try {
       // Call the addPlace action with the userId
-      await addPlace({ ...formData, userId: user.id });
+      await addPlace({ ...formData, clerkId: user.id });
       toast({ title: "Place added successfully!" });
       router.push(`/states/${formData.state.toLowerCase().replace(/\s+/g, '-')}`);
     } catch (error) {
