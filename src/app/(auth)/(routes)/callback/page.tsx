@@ -2,26 +2,33 @@ import { onAuthenticatedUser } from '@/actions/user'
 import { redirect } from 'next/navigation'
 
 const AuthCallbackPage = async () => {
+  let redirectPath: string | null = null
+
   try {
     const auth = await onAuthenticatedUser()
     console.log("This is auth", auth)
 
-    if (!auth) {
-      console.error("Authentication failed or returned null")
-      return redirect('/sign-in')
-    }
-
     if (auth.status === 200 || auth.status === 201) {
-      return redirect('/')
+      // Set the redirect path to home
+      redirectPath = '/'
     }
 
     if (auth.status === 403 || auth.status === 400 || auth.status === 500) {
-      return redirect('/sign-in')
+      // Set the redirect path to sign-in page
+      redirectPath = '/sign-in'
     }
   } catch (error) {
     console.error("Error during authentication", error)
-    return redirect('/sign-in')
+    // If an error occurs, redirect to the sign-in page
+    redirectPath = '/sign-in'
+  } finally {
+    // Perform the redirect if the redirectPath is set
+    if (redirectPath) {
+      redirect(redirectPath)
+    }
   }
+
+  return <>{/* Add the rest of your JSX if needed */}</>
 }
 
 export default AuthCallbackPage
