@@ -33,10 +33,11 @@ type ProfileHeaderProps = {
 
 
 export function ProfileHeader(user: ProfileHeaderProps | null) {
+  const [copied, setCopied] = useState(false);
+
   if (!user) {
     return null;
   }
-  const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
     await navigator.clipboard.writeText(window.location.href);
