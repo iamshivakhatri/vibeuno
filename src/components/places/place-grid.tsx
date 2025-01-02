@@ -16,7 +16,7 @@ type Place = {
   description: string | null;
   city: string;
   category: string;
-  imageUrl: string | null;
+  imageUrl?: string | undefined | null;
   createdAt: Date;
   updatedAt: Date;
   userId: string;
@@ -60,7 +60,7 @@ export function PlaceGrid({ state }: PlaceGridProps) {
             id: place.id,
             name: place.name,
             description: place.description || '',
-            imageUrl: place.imageUrl || '',
+            imageUrl: place.imageUrl || null || undefined,
             _count: {
               votes: place._count.votes || 0,
             },

@@ -5,6 +5,7 @@ import { Search, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { TopContributors } from '@/components/top-contributors';
 import Link from 'next/link';
+import {Footer} from '@/components/footer';
 
 export default function Home() {
   return (
@@ -77,6 +78,8 @@ export default function Home() {
           </Button>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

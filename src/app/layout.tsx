@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from "@/components/theme";
 
 import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
 
 import { ClerkProvider } from "@clerk/nextjs";
@@ -34,14 +33,13 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light">
             <div className="flex min-h-screen flex-col">
-              <Navbar />
               <ReactQueryProvider>
+               <Navbar />
                <main className="flex-1">
                 {children}
                 <Toaster />
                 </main>
                 </ReactQueryProvider>
-              <Footer />
             </div>
         </ThemeProvider>
       </body>

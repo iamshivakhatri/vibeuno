@@ -14,7 +14,7 @@ interface PlaceCardProps {
     id: string;
     name: string;
     description: string;
-    imageUrl: string;
+    imageUrl?: string | null | undefined;
     _count: { votes: number };
     city: string;
   };
