@@ -6,12 +6,23 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu';
 import { Search, MapPin, Menu } from 'lucide-react';
-import { useUser, UserButton, SignInButton } from '@clerk/nextjs';
-import { MenuIcon, User } from 'lucide-react'
+import { useUser } from '@clerk/nextjs';
+import { useState } from 'react';
+import { User } from 'lucide-react';
+import { useClerk } from '@clerk/nextjs'
+import { useClerkData } from '@/hooks/use-clerkdata';
 
 
 export function Navbar() {
   const { user, isSignedIn } = useUser();
+  const { signOut } = useClerk()
+  const {appUserId } = useClerkData()
+  console.log('all the data from useClerkData', appUserId);
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const closeDropdown = () => setDropdownOpen(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -56,17 +67,56 @@ export function Navbar() {
             <Search className="h-5 w-5" />
           </Button>
 
-          {/* Show avatar if user is logged in, else show "Sign In" button */}
+          {/* Custom Dropdown for Profile */}
           {isSignedIn ? (
-            <UserButton afterSignOutUrl="/" />
+            <div className="relative">
+              <button
+                onClick={toggleDropdown}
+                className="flex items-center focus:outline-none"
+              >
+                <img
+                  src={user?.imageUrl || '/default-avatar.png'}
+                  alt="Profile"
+                  className="w-8 h-8 rounded-full"
+                />
+              </button>
+
+              {dropdownOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10"
+                  onMouseLeave={closeDropdown}
+                >
+                  <ul className="py-2 text-sm text-gray-700">
+                    <li>
+                    <Link href={`/profile/${appUserId}`} className="block px-4 py-2 hover:bg-gray-100">
+                      Profile
+                    </Link>
+
+                    </li>
+                    <li>
+                      <Link href="/settings" className="block px-4 py-2 hover:bg-gray-100">
+                        Settings
+                      </Link>
+                    </li>
+                    <li>
+                    <button 
+                    onClick={() => signOut({ redirectUrl: '/' })}
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        Sign Out
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
           ) : (
-            <Link href="/sign-in">  
-        <Button className=''>
-            <User className='mr-2' />
-            Sign In
-        </Button>
-        
-        </Link>
+            <Link href="/sign-in">
+              <Button className="">
+                <User className="mr-2" />
+                Sign In
+              </Button>
+            </Link>
           )}
         </div>
       </div>

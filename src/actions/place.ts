@@ -141,3 +141,153 @@ export async function voteForPlace(placeId: string, userId: string) {
 
 
 
+// export async function getUserPlaces(userId: string) {
+//   try {
+//     // Fetch the visited places associated with the given userId
+//     const places = await prisma.place.findMany({
+//       where: {
+//         userId: userId,  // Filter by userId to get visited places
+//       },
+//       select: {
+//         id: true,
+//         name: true,
+//         description: true,
+//         state: true,
+//         city: true,
+//         category: true,
+//         imageUrl: true,
+//         createdAt: true,
+//       },
+//     });
+
+//     return places;  // Returning the list of places
+//   } catch (error) {
+//     console.error('Error fetching visited places:', error);
+//     throw new Error('Error fetching visited places');
+//   }
+// }
+
+
+// export async function getUserWishlist(userId: string) {
+//   try {
+//     // Fetch the wishlist places associated with the given userId
+//     const wishlistPlaces = await prisma.wishlistItem.findMany({
+//       where: {
+//         userId: userId,  // Filter by userId to get wishlist places
+//       },
+//       include: {
+//         place: {  // Join with the Place model to get place details
+//           select: {
+//             id: true,
+//             name: true,
+//             description: true,
+//             state: true,
+//             city: true,
+//             category: true,
+//             imageUrl: true,
+//             createdAt: true,
+//           },
+//         },
+//       },
+//     });
+
+//     // Returning the list of places from the wishlist
+//     return wishlistPlaces.map((item) => item.place);
+//   } catch (error) {
+//     console.error('Error fetching wishlist places:', error);
+//     throw new Error('Error fetching wishlist places');
+//   }
+// }
+
+
+type Place = {
+  state: string; // State where the place is located
+  name: string; // Name of the place
+  id: string; // Unique ID for the place
+  description: string | null; // Description of the place, may be null
+  city: string; // City where the place is located
+  category: string; // Category of the place (e.g., "entertainment")
+  imageUrl: string | null; // URL of an image associated with the place, may be null
+  _count: {
+    votes: number; // Number of votes for the place
+  };
+};
+
+export async function getUserPlaces(userId: string): Promise<Place[]> {
+  try {
+    // Fetch the visited places associated with the given userId
+    const places = await prisma.place.findMany({
+      where: {
+        userId: userId,  // Filter by userId to get visited places
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        state: true,
+        city: true,
+        category: true,
+        imageUrl: true,
+        createdAt: true,
+        _count: {
+          select: {
+            votes: true,  // Select the count of votes
+          },
+        },
+      },
+    });
+
+    return places.map((place) => ({
+      ...place,
+      _count: {
+        votes: place._count?.votes || 0,  // Ensure votes field is populated
+      },
+    }));
+  } catch (error) {
+    console.error('Error fetching visited places:', error);
+    throw new Error('Error fetching visited places');
+  }
+}
+
+export async function getUserWishlist(userId: string): Promise<Place[]> {
+  try {
+    // Fetch the wishlist places associated with the given userId
+    const wishlistPlaces = await prisma.wishlistItem.findMany({
+      where: {
+        userId: userId,  // Filter by userId to get wishlist places
+      },
+      include: {
+        place: {  // Join with the Place model to get place details
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            state: true,
+            city: true,
+            category: true,
+            imageUrl: true,
+            createdAt: true,
+            _count: {
+              select: {
+                votes: true,  // Select the count of votes
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Map the wishlist data to the Place type format
+    return wishlistPlaces.map((item) => ({
+      ...item.place,
+      _count: {
+        votes: item.place._count?.votes || 0,  // Ensure votes field is populated
+      },
+    }));
+  } catch (error) {
+    console.error('Error fetching wishlist places:', error);
+    throw new Error('Error fetching wishlist places');
+  }
+}
+
+

@@ -9,6 +9,9 @@ import { Toaster } from '@/components/ui/toaster';
 
 import { ClerkProvider } from "@clerk/nextjs";
 
+import ReactQueryProvider from "@/react-query";
+
+
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -32,10 +35,14 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light">
             <div className="flex min-h-screen flex-col">
               <Navbar />
-              <main className="flex-1">{children}</main>
+              <ReactQueryProvider>
+               <main className="flex-1">
+                {children}
+                <Toaster />
+                </main>
+                </ReactQueryProvider>
               <Footer />
             </div>
-            <Toaster />
         </ThemeProvider>
       </body>
     </html>

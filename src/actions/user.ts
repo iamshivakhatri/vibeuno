@@ -103,3 +103,131 @@ export const onAuthenticatedUser = async () => {
     return { status: 500, message: 'An unexpected error occurred' };
   }
 };
+
+
+export const getUserById = async (userId: string) => {
+  try {
+
+    // first check if the user is authenticated
+    const checkUser = await currentUser();
+    if (!checkUser) {
+      return { status: 403, message: 'User not authenticated' };
+    }
+
+
+
+    // Fetch the user from the database
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        clerkId: checkUser.id,
+      },
+    });
+
+    if (!user) {
+      return { status: 404, message: 'User not found' };
+    }
+
+    return { status: 200, user };
+  } catch (error) {
+    console.error('Error fetching user by ID:', error);
+    return { status: 500, message: 'Failed to fetch user' };
+  }
+}
+
+
+
+
+/**
+ * Fetches user profile data including their places and votes.
+ * @param userId - The ID of the user to fetch data for.
+ * @returns User profile data including places and votes.
+ * @throws Error if the user is not found.
+ */
+// export async function getProfileData(userId: string) {
+//   try {
+//     // Fetch user data
+//     const user = await prisma.user.findUnique({
+//       where: { id: userId },
+//       include: {
+//         places: true, // Include places created by the user
+//         votes: {
+//           include: {
+//             place: true, // Include details about places the user voted for
+//           },
+//         },
+//       },
+//     });
+
+//     if (!user) {
+//       throw new Error('User not found');
+//     }
+
+//     // Format and return the data
+//     return {
+//       id: user.id,
+//       clerkId: user.clerkId,
+//       email: user.email,
+//       name: user.name,
+//       createdAt: user.createdAt,
+//       places: user.places.map((place) => ({
+//         id: place.id,
+//         name: place.name,
+//         description: place.description,
+//         state: place.state,
+//         city: place.city,
+//         category: place.category,
+//         imageUrl: place.imageUrl,
+//         createdAt: place.createdAt,
+//         updatedAt: place.updatedAt,
+//       })),
+//       votes: user.votes.map((vote) => ({
+//         id: vote.id,
+//         placeId: vote.placeId,
+//         createdAt: vote.createdAt,
+//         place: {
+//           id: vote.place.id,
+//           name: vote.place.name,
+//           description: vote.place.description,
+//           state: vote.place.state,
+//           city: vote.place.city,
+//           category: vote.place.category,
+//           imageUrl: vote.place.imageUrl,
+//         },
+//       })),
+//     };
+//   } catch (error) {
+//     console.error('Error fetching profile data:', error);
+//     throw new Error('Unable to fetch profile data');
+//   }
+// }
+
+export async function getProfileData(userId: string) {
+  try {
+    // Fetch user data with counts for places and votes
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        places: true, // Fetch places to count them
+        votes: true,  // Fetch votes to count them
+      },
+    });
+
+    if (!user) {
+      throw new Error(`User with ID ${userId} not found`);
+    }
+
+    return {
+      id: user.id,
+      clerkId: user.clerkId || null,
+      email: user.email,
+      name: user.name || 'Anonymous',
+      createdAt: user.createdAt.toISOString(),
+      placesCount: user.places.length, // Count of places created by the user
+      votesCount: user.votes.length,  // Count of votes made by the user
+    };
+  } catch (error) {
+    console.error('Error fetching profile data:', error);
+    throw new Error('Unable to fetch profile data');
+  }
+}

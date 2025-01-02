@@ -16,10 +16,12 @@ model Place {
   city        String
   category    String
   imageUrl    String?
+  type        PlaceType @default(VISITED) // VISITED or WISHLIST
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userId      String
   votes       Vote[]
+  wishlistItems WishlistItem[] // Back-reference for places added to wishlists
   user        User      @relation(fields: [userId], references: [id])
 
   @@index([state])
@@ -35,6 +37,7 @@ model User {
   createdAt DateTime @default(now())
   places    Place[]
   votes     Vote[]
+  wishlist  WishlistItem[]  // Back-reference to wishlist items
 }
 
 model Vote {
@@ -46,4 +49,23 @@ model Vote {
   user      User     @relation(fields: [userId], references: [id])
 
   @@unique([placeId, userId])
+}
+
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  placeId   String
+  userId    String
+  notes     String?  // Optional user notes for the wishlist
+  createdAt DateTime @default(now())
+  place     Place    @relation(fields: [placeId], references: [id]) // Link to the Place model
+  user      User     @relation(fields: [userId], references: [id]) // Link to the User model
+
+  @@unique([placeId, userId]) // Prevent duplicates for the same user and place
+}
+
+// Enum to define the type of a place
+enum PlaceType {
+  VISITED
+  WISHLIST
 }
