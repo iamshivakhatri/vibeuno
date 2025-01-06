@@ -22,7 +22,7 @@ export default function ExplorePage() {
           </div>
           <Button
             variant="outline"
-            className="flex items-center gap-2 min-w-[140px] bg-background hover:bg-accent"
+            className="flex items-center gap-2 min-w-[140px] bg-background hover:bg-accent  border-primary"
             onClick={() => window.location.href = '/states'}
           >
             <MapPinned className="h-4 w-4" />

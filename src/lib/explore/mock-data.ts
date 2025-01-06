@@ -96,7 +96,7 @@ export const mockDining: CategoryItem[] = [
     description: "Fresh local ingredients",
     imageUrl: "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae",
     likes: 398,
-    author: "Chef's Choice"
+    author: "Chef&apos;s Choice"
   },
   {
     title: "Street Food Corner",
