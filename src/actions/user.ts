@@ -217,6 +217,11 @@ export async function getProfileData(userId: string) {
       throw new Error(`User with ID ${userId} not found`);
     }
 
+       // Calculate points
+      const upvotePoints = user.votes.length * 3; // Each upvote gives 3 points
+      const placePoints = user.places.length * 5;  // Each place gives 5 points
+      const totalPoints = upvotePoints + placePoints;
+
     return {
       id: user.id,
       clerkId: user.clerkId || null,
@@ -225,6 +230,8 @@ export async function getProfileData(userId: string) {
       createdAt: user.createdAt.toISOString(),
       placesCount: user.places.length, // Count of places created by the user
       votesCount: user.votes.length,  // Count of votes made by the user
+      totalPoints,  // Total points calculated
+
     };
   } catch (error) {
     console.error('Error fetching profile data:', error);

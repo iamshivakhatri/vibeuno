@@ -27,6 +27,8 @@ type ProfileHeaderProps = {
 
     votesCount: number;
 
+    totalPoints: number;
+
   };
 };
 
@@ -91,7 +93,7 @@ export function ProfileHeader(user: ProfileHeaderProps | null) {
               <div className="flex items-center gap-2">
                 <Award className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-2xl font-semibold">{user.user.votesCount}</p>
+                  <p className="text-2xl font-semibold">{user.user.totalPoints}</p>
                   <p className="text-sm text-muted-foreground">Points Earned</p>
                 </div>
               </div>
