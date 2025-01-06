@@ -20,7 +20,7 @@ export function WeatherDress({ weather, dressCode }: WeatherDressProps) {
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <Cloud className="h-5 w-5" />
-            <h3 className="font-semibold">Today's Weather</h3>
+            <h3 className="font-semibold">Today&apos;s Weather</h3>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-4xl">{weather.icon}</div>
