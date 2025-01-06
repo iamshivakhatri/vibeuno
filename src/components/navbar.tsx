@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu';
-import { Search, MapPin, Menu } from 'lucide-react';
+import { Search, MapPin, Menu, X } from 'lucide-react';
 import { useUser } from '@clerk/nextjs';
 import { useState, useEffect } from 'react';
 import { User } from 'lucide-react';
@@ -17,6 +17,8 @@ export function Navbar() {
   const { user, isSignedIn } = useUser();
   const { signOut } = useClerk();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+
 
   const { data: appUserId = "", isLoading, isError, error } = useQuery({
     queryKey: ['userId'],
@@ -114,9 +116,43 @@ export function Navbar() {
         </NavigationMenu>
 
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
+             {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </div>
+             {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="ml-0 absolute top-16  left-[-12px] w-full bg-white shadow-lg md:hidden">
+          <ul className="flex flex-col space-y-2 p-4">
+            <li>
+              <Link href="/explore" legacyBehavior passHref>
+                <a
+                  className="block rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Explore
+                </a>
+              </Link>
+            </li>
+            <li>
+              <Link href="/add-place" legacyBehavior passHref>
+                <a
+                  className="block rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Add Place
+                </a>
+              </Link>
+            </li>
+          </ul>
+        </div>
+      )}
           <Button variant="ghost" size="icon">
             <Search className="h-5 w-5" />
           </Button>
