@@ -34,7 +34,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light">
             <div className="flex min-h-screen flex-col">
               <ReactQueryProvider>
-               <Navbar />
+                <Navbar />
                <main className="flex-1">
                 {children}
                 <Toaster />

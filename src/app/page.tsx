@@ -1,3 +1,4 @@
+"use client";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -6,10 +7,18 @@ import Image from 'next/image';
 import { TopContributors } from '@/components/top-contributors';
 import Link from 'next/link';
 import {Footer} from '@/components/footer';
+import {Navbar} from '@/components/navbar';
+import { useState } from 'react';
+import { SearchBar } from "@/components/explore/search-bar";
+
+
 
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <div className="flex flex-col">
+
       {/* Hero Section */}
       <section className="relative h-[600px] flex items-center justify-center bg-[url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800')] bg-cover bg-center">
         <div className="absolute inset-0 bg-black/40" />
@@ -25,9 +34,15 @@ export default function Home() {
               placeholder="Search states, cities, or places..." 
               className="bg-white/90 text-black"
             />
+
             <Button size="icon" variant="secondary">
               <Search className="h-4 w-4" />
             </Button>
+            {/* <SearchBar 
+              value={searchQuery}
+              onChange={setSearchQuery}
+              className="bg-white/90 text-black"
+            /> */}
           </div>
         </div>
       </section>
