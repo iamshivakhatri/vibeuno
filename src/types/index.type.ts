@@ -5,7 +5,7 @@ export type Place = {
     description: string | null; // Description of the place, may be null
     city: string; // City where the place is located
     category: string; // Category of the place (e.g., "entertainment")
-    imageUrl: string | null; // URL of an image associated with the place, may be null
+    imageUrl?: string | null; // URL of an image associated with the place, may be null
   _count: {
           votes: number; // Number of votes for the place
       };

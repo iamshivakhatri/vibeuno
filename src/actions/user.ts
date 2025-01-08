@@ -12,6 +12,7 @@ export async function getContributor() {
         id: true,
         name: true,
         email: true,
+        profileUrl: true,
         _count: {
           select: {
             places: true,
@@ -27,10 +28,12 @@ export async function getContributor() {
       take: 10,
     });
 
+
     // Map the contributors and calculate points
     const topContributors = contributors.map(contributor => ({
       id: contributor.id,
       name: contributor.name || contributor.email.split('@')[0],
+      profileUrl: contributor.profileUrl,
       points: (contributor._count.places * 10) + (contributor._count.votes * 2),
     }));
 
@@ -83,6 +86,7 @@ export const onAuthenticatedUser = async () => {
         email: email,
         name: name,
         clerkId: user.id,
+        profileUrl: user.imageUrl || null,
       
       },
     });
@@ -120,9 +124,11 @@ export const getUserById = async (userId: string) => {
     const user = await prisma.user.findUnique({
       where: {
         id: userId,
-        clerkId: checkUser.id,
+        // clerkId: checkUser.id,
       },
     });
+
+    console.log('User:', user);
 
     if (!user) {
       return { status: 404, message: 'User not found' };
@@ -134,6 +140,35 @@ export const getUserById = async (userId: string) => {
     return { status: 500, message: 'Failed to fetch user' };
   }
 }
+
+export const getShareUserById = async (userId: string) => {
+  try {
+
+    // first check if the user is authenticated
+   
+
+
+    // Fetch the user from the database
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+        // clerkId: checkUser.id,
+      },
+    });
+
+    console.log('User:', user);
+
+    if (!user) {
+      return { status: 404, message: 'User not found' };
+    }
+
+    return { status: 200, user };
+  } catch (error) {
+    console.error('Error fetching user by ID:', error);
+    return { status: 500, message: 'Failed to fetch user' };
+  }
+}
+
 
 
 

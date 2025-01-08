@@ -15,12 +15,18 @@ export function generateStaticParams() {
 }
 
 export default function StatePage({ params }: StatePageProps) {
-  const state = decodeURIComponent(params.state).replace(/-/g, ' ');
-  const formattedState = state.split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+  const state = decodeURIComponent(params.state).replace(/_/g, ' ');
 
-  if (!US_STATES.map(s => s.toLowerCase()).includes(state.toLowerCase())) {
+  // Format the state to title case (capitalize first letter of each word)
+  const formattedState = state
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join('_');
+
+  console.log('Formatted state:', formattedState);
+
+  // Check if the formatted state is in the list of known US states
+  if (!US_STATES.map(s => s.toLowerCase()).includes(formattedState.toLowerCase())) {
     notFound();
   }
   

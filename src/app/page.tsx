@@ -9,7 +9,10 @@ import Link from 'next/link';
 import {Footer} from '@/components/footer';
 import {Navbar} from '@/components/navbar';
 import { useState } from 'react';
-import { SearchBar } from "@/components/explore/search-bar";
+import { SearchBar } from "@/components/explore/search-bar"; 
+
+import { STATE_IMAGE_URLS } from '@/lib/states';
+
 
 
 
@@ -38,44 +41,40 @@ export default function Home() {
             <Button size="icon" variant="secondary">
               <Search className="h-4 w-4" />
             </Button>
-            {/* <SearchBar 
-              value={searchQuery}
-              onChange={setSearchQuery}
-              className="bg-white/90 text-black"
-            /> */}
+
           </div>
         </div>
       </section>
 
       {/* Featured States Section */}
       <section className="py-16 bg-background">
-        <div className="container">
-          <h2 className="text-3xl font-semibold text-center mb-12">Popular States</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {['California', 'New York', 'Florida'].map((state) => (
-              <Card key={state} className="group relative overflow-hidden">
-                <div className="aspect-[4/3] relative">
-                  <Image
-                    src={`https://source.unsplash.com/featured/?${state},landmark`}
-                    alt={state}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                    width={800}
-                    height={600}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Link href={`/states/${state.toLowerCase()}`}>
-                      <Button variant="secondary" className="font-semibold">
-                        Explore {state}
-                      </Button>
-                    </Link>
-                  </div>
+      <div className="container">
+        <h2 className="text-3xl font-semibold text-center mb-12">Popular States</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {(['California', 'New_York', 'Florida'] as const).map((state) => (
+            <Card key={state} className="group relative overflow-hidden">
+              <div className="aspect-[4/3] relative">
+                <Image
+                  src={STATE_IMAGE_URLS[state] || `https://source.unsplash.com/featured/?${state},landmark`}
+                  alt={state}
+                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                  width={800}
+                  height={600}
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Link href={`/states/${state.toLowerCase()}`}>
+                    <Button variant="secondary" className="font-semibold">
+                      Explore {state}
+                    </Button>
+                  </Link>
                 </div>
-              </Card>
-            ))}
-          </div>
+              </div>
+            </Card>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* Top Contributors Section */}
       <TopContributors />

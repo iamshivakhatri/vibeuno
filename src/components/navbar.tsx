@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export function Navbar() {
   const { user, isSignedIn } = useUser();
+  console.log('User at the navbar:', user?.imageUrl);
   const { signOut } = useClerk();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);

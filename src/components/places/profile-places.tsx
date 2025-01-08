@@ -4,6 +4,8 @@ import { PlaceCard } from './place-card';
 // Define the interface for the component's props
 interface PlaceGridProps {
   places: Place[]; // List of places to display
+  viewMode ?: 'grid' | 'list';
+
 }
 
 // Define the structure of the Place data type
@@ -14,13 +16,13 @@ type Place = {
   description: string | null; // Description of the place, may be null
   city: string; // City where the place is located
   category: string; // Category of the place (e.g., "entertainment")
-  imageUrl: string | null; // URL of an image associated with the place, may be null
+  imageUrl?: string | null; // URL of an image associated with the place, may be null
 _count: {
         votes: number; // Number of votes for the place
     };
 };
 
-export function PlaceGrid({ places }: PlaceGridProps) {
+export function PlaceGrid({ places, viewMode }: PlaceGridProps) {
   // Check if there are no places and display a message if none found
   if (!places || places.length === 0) {
     return <div>No places found.</div>;
