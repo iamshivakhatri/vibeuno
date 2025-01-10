@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ThumbsUp } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useState } from 'react';
 import { voteForPlace } from '@/actions/place';
 import { useAuth } from '@/lib/auth';
@@ -80,7 +80,7 @@ export function PlaceCard({ place }: PlaceCardProps) {
           disabled={hasVoted || isVoting}
           className="flex items-center gap-2"
         >
-          <ThumbsUp className="h-4 w-4" />
+          <Heart className="h-4 w-4" />
           <span>{votes}</span>
         </Button>
         <Button variant="link" className="text-sm">

@@ -12,6 +12,7 @@ import { User } from 'lucide-react';
 import { useClerk } from '@clerk/nextjs';
 import { getAppUserId } from '@/actions/auth';
 import { useQuery } from '@tanstack/react-query';
+import { getProfileUrl } from '@/actions/user';
 
 export function Navbar() {
   const { user, isSignedIn } = useUser();
@@ -19,6 +20,21 @@ export function Navbar() {
   const { signOut } = useClerk();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileUrl, setProfileUrl] = useState<string | null>(null); // Still keep it in state for rendering
+
+  
+
+
+  useEffect(() => {
+    const fetchProfileUrl = async () => {
+      if (isSignedIn && user?.id) {
+        const url = await getProfileUrl(user.id); // Call the function to get the profile URL
+        setProfileUrl(url ?? null);
+      }
+    };
+
+    fetchProfileUrl();
+  }, [isSignedIn, user?.id]); // Dependency on sign-in status and user ID
 
 
   const { data: appUserId = "", isLoading, isError, error } = useQuery({
@@ -86,7 +102,7 @@ export function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
           <MapPin className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">TravelVote</span>
+          <span className="text-xl font-bold">Vibeuno</span>
         </Link>
 
         <NavigationMenu className="hidden md:flex">
@@ -166,7 +182,7 @@ export function Navbar() {
                 className="flex items-center focus:outline-none"
               >
                 <img
-                  src={user?.imageUrl || '/default-avatar.png'}
+                  src= { profileUrl || user?.imageUrl || '/default-avatar.png'}
                   alt="Profile"
                   className="w-8 h-8 rounded-full"
                 />

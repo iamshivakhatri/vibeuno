@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'TravelVote - Discover & Share Amazing Places',
+  title: 'Vibeuno - Discover & Share Amazing Places',
   description: 'Discover, vote, and share the best places to visit across states and cities.',
 };
 

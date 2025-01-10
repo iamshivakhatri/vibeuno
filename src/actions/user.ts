@@ -1,6 +1,34 @@
 "use server"
 import { prisma } from '@/lib/db';
 import { currentUser } from "@clerk/nextjs/server";
+import axios from 'axios';
+
+
+export async function uploadProfilePicture(file: File, userId: string): Promise<string> {
+  try {
+    // Step 1: Get a pre-signed URL from your server
+    const response = await axios.post('/api/aws', {
+      fileType: file.type,
+      userId,
+    });
+    
+    // Access the `imageUrl` from the response
+    const imageUrl = response.data.imageUrl;
+
+    // Step 2: Upload the imageUrl to databse.
+    await prisma.user.update({
+      where: { clerkId: userId },
+      data: {
+        profileUrl: imageUrl,
+      },
+    });
+
+    return imageUrl;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to upload profile picture');
+  }
+}
 
 
 
@@ -266,10 +294,27 @@ export async function getProfileData(userId: string) {
       placesCount: user.places.length, // Count of places created by the user
       votesCount: user.votes.length,  // Count of votes made by the user
       totalPoints,  // Total points calculated
+      profileUrl: user.profileUrl || null,
+      coverPhotoUrl: user.coverPhotoUrl || null,
 
     };
   } catch (error) {
     console.error('Error fetching profile data:', error);
     throw new Error('Unable to fetch profile data');
   }
+}
+
+
+export async function getProfileUrl(userId: string) {
+  try{
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+    });
+    return user?.profileUrl;
+
+  }catch(error){
+    console.error('Error fetching profile url:', error);
+    throw new Error('Unable to fetch profile url');
+  }
+ 
 }

@@ -10,12 +10,14 @@ generator client {
 
 model Place {
   id          String    @id @default(cuid())
-  name        String
+  name        String?
   description String?
   state       String
   city        String
-  category    String
+  country     String?
+  category    String?
   imageUrl    String?
+  image       Json?
   type        PlaceType @default(VISITED) // VISITED or WISHLIST
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -35,6 +37,7 @@ model User {
   email     String   @unique
   name      String?
   profileUrl    String?
+  coverPhotoUrl String?
   createdAt DateTime @default(now())
   places    Place[]
   votes     Vote[]
