@@ -11,11 +11,11 @@ interface PlaceGridProps {
 
 type Place = {
   state: string;
-  name: string;
+  name: string | null;
   id: string;
   description: string | null;
   city: string;
-  category: string;
+  category: string | null;
   imageUrl?: string | undefined | null;
   createdAt: Date;
   updatedAt: Date;
@@ -58,7 +58,7 @@ export function PlaceGrid({ state }: PlaceGridProps) {
           key={place.id}
           place={{
             id: place.id,
-            name: place.name,
+            name: place.name || '',
             description: place.description || '',
             imageUrl: place.imageUrl || null || undefined,
             _count: {

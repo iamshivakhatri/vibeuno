@@ -19,11 +19,16 @@ export function SearchBar({ value, onChange,className }: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
-    if (value.length >= 3) {
-      setSuggestions(getSearchSuggestions(value));
-    } else {
-      setSuggestions([]);
-    }
+    const fetchSuggestions = async () => {
+      if (value.length >= 3) {
+        const suggestions = await getSearchSuggestions(value);
+        setSuggestions(suggestions);
+      } else {
+        setSuggestions([]);
+      }
+    };
+
+    fetchSuggestions();
   }, [value]);
 
   return (
