@@ -16,6 +16,7 @@ const s3Client = new S3Client({
   });
 
 export async function POST(req: Request) {
+    
     try {
       const formData = await req.formData();
       const file = formData.get('file') as Blob;
