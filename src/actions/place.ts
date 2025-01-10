@@ -282,6 +282,8 @@ export async function getUserWishlist(userId: string): Promise<Place[]> {
     // Map the wishlist data to the Place type format
     return wishlistPlaces.map((item) => ({
       ...item.place,
+      name: item.place.name || '', // Ensure name is always a string
+      category: item.place.category || '', // Ensure category is always a string
       _count: {
         votes: item.place._count?.votes || 0,  // Ensure votes field is populated
       },
