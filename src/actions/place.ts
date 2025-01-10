@@ -4,7 +4,7 @@
 import { prisma } from "@/lib/db";
 
 export async function addPlace(formData: {
-  name: string;
+  name?: string;
   description: string;
   imageUrl: string;
   clerkId?: string;  // clerkId is received as input
@@ -239,6 +239,8 @@ export async function getUserPlaces(userId: string): Promise<Place[]> {
 
     return places.map((place) => ({
       ...place,
+      name: place.name || '', // Ensure name is always a string
+      category: place.category || '', // Ensure category is always a string
       _count: {
         votes: place._count?.votes || 0,  // Ensure votes field is populated
       },
