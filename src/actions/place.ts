@@ -7,6 +7,10 @@ import { auth } from '@clerk/nextjs/server'
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation";
 
+import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+
+
+
 
 export async function addPlace(formData: {
   name?: string;
@@ -322,64 +326,8 @@ export async function getPlaceVisitors(placeId: string) {
 
 
 
-export async function deletePlace(placeId: string, userId: string) {
-  try {
-    
-
-    await prisma.vote.deleteMany({
-      where: {
-        placeId: placeId,  // Ensure the votes are related to this place
-      },
-    });
-
-    await prisma.wishlistItem.deleteMany({
-      where: {
-        placeId: placeId,  // Ensure the wishlist items are related to this place
-      },
-    });
 
 
-    await prisma.place.delete({
-      where: {
-        id: placeId,
-      },
-    })
-
-    revalidatePath('/places')
-    redirect(`profile/${userId}`)
-    return { success: true }
-  } catch (error) {
-    console.error('Failed to delete place:', error)
-    return { success: false, error: 'Failed to delete place' }
-  }
-}
-
-export async function deleteImage(placeId: string, imageIndex: number) {
-  try {
-    const place = await prisma.place.findUnique({
-      where: { id: placeId },
-      select: { image: true }
-    })
-
-    if (!place?.image) {
-      throw new Error('Place or image not found')
-    }
-
-    const imagesArray = Array.isArray(place.image) ? place.image : [];
-    const updatedImages = imagesArray.filter((_, index) => index !== imageIndex);
-
-    await prisma.place.update({
-      where: { id: placeId },
-      data: { image: updatedImages }
-    })
-
-    revalidatePath(`/places/${placeId}`)
-    return { success: true }
-  } catch (error) {
-    console.error('Failed to delete image:', error)
-    return { success: false, error: 'Failed to delete image' }
-  }
-}
 
 export async function updateDescription(placeId: string, description: string) {
   try {
@@ -496,5 +444,204 @@ export async function voteForPlace(placeId: string, userId: string) {
   } catch (error) {
     console.error('Error voting for place:', error);
     throw new Error('Unable to vote for place');
+  }
+}
+
+
+
+
+// export async function deletePlace(placeId: string, userId: string) {
+//   try {
+    
+
+//     await prisma.vote.deleteMany({
+//       where: {
+//         placeId: placeId,  // Ensure the votes are related to this place
+//       },
+//     });
+
+//     await prisma.wishlistItem.deleteMany({
+//       where: {
+//         placeId: placeId,  // Ensure the wishlist items are related to this place
+//       },
+//     });
+
+
+//     await prisma.place.delete({
+//       where: {
+//         id: placeId,
+//       },
+//     })
+
+//     revalidatePath('/places')
+//     redirect(`profile/${userId}`)
+//     return { success: true }
+//   } catch (error) {
+//     console.error('Failed to delete place:', error)
+//     return { success: false, error: 'Failed to delete place' }
+//   }
+// }
+
+// export async function deleteImage(placeId: string, imageIndex: number) {
+//   try {
+//     const place = await prisma.place.findUnique({
+//       where: { id: placeId },
+//       select: { image: true }
+//     })
+
+//     if (!place?.image) {
+//       throw new Error('Place or image not found')
+//     }
+
+//     const imagesArray = Array.isArray(place.image) ? place.image : [];
+//     const updatedImages = imagesArray.filter((_, index) => index !== imageIndex);
+
+//     await prisma.place.update({
+//       where: { id: placeId },
+//       data: { image: updatedImages }
+//     })
+
+//     revalidatePath(`/places/${placeId}`)
+//     return { success: true }
+//   } catch (error) {
+//     console.error('Failed to delete image:', error)
+//     return { success: false, error: 'Failed to delete image' }
+//   }
+// }
+
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+// Helper function to extract key from S3 URL
+function getS3KeyFromUrl(url: string): string {
+  const urlObj = new URL(url);
+  // Remove the leading slash
+  return urlObj.pathname.substring(1);
+}
+
+// Helper function to delete a single image from S3
+async function deleteFromS3(imageUrl: string) {
+  try {
+    const key = getS3KeyFromUrl(imageUrl);
+    await s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: key,
+      })
+    );
+  } catch (error) {
+    console.error('Failed to delete from S3:', error);
+    throw error;
+  }
+}
+
+export async function deletePlace(placeId: string, userId: string) {
+  try {
+    // First, get the place and its images
+    const place = await prisma.place.findUnique({
+      where: { id: placeId },
+      select: { image: true },
+    });
+
+    if (!place) {
+      throw new Error('Place not found');
+    }
+
+    // Delete all images from S3
+    // const deletePromises = place.image.map((imageUrl: string) => 
+    //   deleteFromS3(imageUrl)
+    // );
+
+    // // Wait for all S3 deletions to complete
+    // await Promise.all(deletePromises);
+
+    // Ensure image is an array and handle potential null/undefined values
+    const images = place.image as string[];
+    if (Array.isArray(images) && images.length > 0) {
+      // Delete all images from S3
+      const deletePromises = images.map((imageUrl) => 
+        deleteFromS3(imageUrl)
+      );
+
+      // Wait for all S3 deletions to complete
+      await Promise.all(deletePromises);
+    }
+    // Then delete all related records from the database
+    await prisma.vote.deleteMany({
+      where: {
+        placeId: placeId,
+      },
+    });
+
+    await prisma.wishlistItem.deleteMany({
+      where: {
+        placeId: placeId,
+      },
+    });
+
+    await prisma.place.delete({
+      where: {
+        id: placeId,
+      },
+    });
+
+    // revalidatePath('/places');
+    // redirect(`profile/${userId}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete place:', error);
+    return { success: false, error: 'Failed to delete place' };
+  }
+}
+
+export async function deleteImage(placeId: string, imageIndex: number) {
+  try {
+    const place = await prisma.place.findUnique({
+      where: { id: placeId },
+      select: { image: true }
+    });
+
+    if (!place?.image) {
+      throw new Error('Place or image not found');
+    }
+
+    const imagesArray = Array.isArray(place.image) ? place.image : [];
+    console.log('Images array:', imagesArray);
+    const imageToDelete = imagesArray[imageIndex] as string;
+    console.log('Image to delete:', imageToDelete);
+
+    if (!imageToDelete) {
+      throw new Error('Image not found at specified index');
+    }
+
+    // Delete the image from S3
+    await deleteFromS3(imageToDelete);
+
+    // Update the database after successful S3 deletion
+    const updatedImages = imagesArray.filter((_, index) => index !== imageIndex);
+    console.log('Updated images:', updatedImages);
+    
+    await prisma.place.update({
+      where: { id: placeId },
+      data: { 
+        image: updatedImages,
+        // Update imageUrl if we're deleting the first image
+        ...(imageIndex === 0 && updatedImages.length > 0 ? 
+          { imageUrl: updatedImages[0] as string } : 
+          {})
+      }
+    });
+
+    revalidatePath(`/places/${placeId}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete image:', error);
+    return { success: false, error: 'Failed to delete image' };
   }
 }

@@ -77,7 +77,6 @@ export const onAuthenticatedUser = async () => {
   try {
     // Get the authenticated user details
     const user = await currentUser();
-    console.log('User:', user);
 
     if (!user) {
       return { status: 403, message: 'User not authenticated' };
@@ -94,7 +93,6 @@ export const onAuthenticatedUser = async () => {
 
     // If the user exists, return the user
     if (userExist) {
-      console.log('User exists:', userExist);
       return { status: 200, user: userExist };
     }
 
@@ -120,8 +118,8 @@ export const onAuthenticatedUser = async () => {
       },
     });
 
-    console.log('New user:', newUser);
 
+    
     if (newUser) {
       return { status: 200, user: newUser };
     }
@@ -157,8 +155,8 @@ export const getUserById = async (userId: string) => {
       },
     });
 
-    console.log('User:', user);
 
+    
     if (!user) {
       return { status: 404, message: 'User not found' };
     }
@@ -185,7 +183,6 @@ export const getShareUserById = async (userId: string) => {
       },
     });
 
-    console.log('User:', user);
 
     if (!user) {
       return { status: 404, message: 'User not found' };
@@ -323,8 +320,7 @@ export async function getProfileUrl(userId: string) {
 
 export async function hasUserVotedForPlace(placeId: string, userId: string) {
   try {
-    console.log('placeId at the action', placeId)
-    console.log('userId at the action', userId)
+
     const user = await prisma.user.findUnique({
       where:{
         clerkId: userId

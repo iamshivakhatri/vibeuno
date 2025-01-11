@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Trash2, X, MoreVertical, Upload } from 'lucide-react'; // Import icons
 import { deletePlace, deleteImage, updateDescription } from '@/actions/place'
+import { toast } from "@/hooks/use-toast";
+
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,8 +48,7 @@ export function PlaceDetail({ place, visitors, userId, isCurrentUser }: PlaceDet
   const [description, setDescription] = useState(place.description || '');
   const [deletingImageIndex, setDeletingImageIndex] = useState<number | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);  
 
 
 
@@ -54,12 +56,16 @@ export function PlaceDetail({ place, visitors, userId, isCurrentUser }: PlaceDet
     try {
       const result = await deletePlace(place.id, userId)
       if (result.success) {
-        window.location.href = '/places'
+        window.location.href = `/profile/${userId}`
       } else {
         // Handle error, maybe show a toast notification
         console.error('Failed to delete place')
+        toast({   title: "Failed to delete place", });
       }
     } catch (error) {
+      toast({
+                title: "Failed to delete place",
+              });
       console.error('Failed to delete place:', error)
     }
   }
@@ -68,16 +74,81 @@ export function PlaceDetail({ place, visitors, userId, isCurrentUser }: PlaceDet
     try {
       console.log('Deleting image:', imageIndex)
       const result = await deleteImage(place.id, imageIndex)
+
       if (result.success) {
         window.location.reload()
       } else {
         // Handle error
         console.error('Failed to delete image')
+        toast({
+          title: "Failed to delete image",
+        });
       }
     } catch (error) {
       console.error('Failed to delete image:', error)
+      toast({
+        title: "Failed to delete image",
+      });
     }
   }
+
+  // const handleDeletePlace = async () => {
+  //   try {
+  //     const response = await fetch('/api/delete-place', {
+  //       method: 'DELETE',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ placeId: place.id }),
+  //     });
+  
+  //     const result = await response.json();
+  
+  //     if (result.success) {
+  //       window.location.href = '/places';
+  //     } else {
+  //       toast({
+  //         title: "Failed to delete place",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('Delete error:', error);
+  //     toast({
+  //       title: "Failed to delete place",
+
+  //     });
+  //   }
+  // };
+  
+  // const handleDeleteImage = async (imageIndex: number) => {
+  //   try {
+  //     const response = await fetch('/api/delete-image', {
+  //       method: 'DELETE',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ 
+  //         placeId: place.id, 
+  //         imageIndex 
+  //       }),
+  //     });
+  
+  //     const result = await response.json();
+  
+  //     if (result.success) {
+  //       window.location.reload();
+  //     } else {
+  //       toast({
+  //         title: "Failed to delete image",
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('Delete error:', error);
+  //     toast({
+  //       title: "Failed to delete image",
+  //     });
+  //   }
+  // };
 
   const handleSaveDescription = async () => {
     try {
