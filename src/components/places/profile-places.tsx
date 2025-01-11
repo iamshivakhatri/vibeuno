@@ -17,7 +17,8 @@ type Place = {
   city: string; // City where the place is located
   category: string; // Category of the place (e.g., "entertainment")
   imageUrl?: string | null; // URL of an image associated with the place, may be null
-_count: {
+  image?: string[]; // List of image URLs associated with the place
+ _count: {
         votes: number; // Number of votes for the place
     };
 };
@@ -43,7 +44,7 @@ export function PlaceGrid({ places, viewMode = 'grid' }: PlaceGridProps) {
             id: place.id, // Place ID
             name: place.name, // Place name
             description: place.description || '', // Place description (defaults to empty string if null)
-            imageUrl: place.imageUrl || '', // Place image URL (defaults to empty string if null)
+            imageUrl: place.image ? place.image[0] || '' : '', // Place image URL (defaults to empty string if null)
             _count: {
               votes: place._count.votes || 0, // Place votes count (defaults to 0 if undefined)
             },

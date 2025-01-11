@@ -32,6 +32,8 @@ export default async function SharedProfilePage({ params }: { params: { id: stri
           </Link>
         </div>
       </div>
+
+      
     </div>
   );
 }

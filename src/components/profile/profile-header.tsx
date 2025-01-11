@@ -18,7 +18,7 @@ type ProfileHeaderProps = {
     placesCount: number;
     votesCount: number;
     totalPoints: number;
-    profileUrl: string | null ;
+    profileUrl: string | null;
     coverPhotoUrl: string | null;
   };
   isCurrentUser?: boolean;
@@ -32,31 +32,25 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
     return null;
   }
 
-
   const handleCoverPhotoChange = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-
-  
     setUploading(true);
     try {
-
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('id', user.id);
+      formData.append("file", file);
+      formData.append("id", user.id);
 
-      const { data } = await axios.post('/api/aws-cover', 
-        formData,        
-        {
+      const { data } = await axios.post("/api/aws-cover", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
-  
-     // Update the user's cover photo URL in the state
+
+      // Update the user's cover photo URL in the state
       if (data?.imageUrl) {
         toast({ title: "Cover photo updated!" });
         // setUser({ ...user, coverPhotoUrl: data.imageUrl });
@@ -67,7 +61,6 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
       setUploading(false);
     }
   };
-  
 
   const handleProfilePictureChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -80,15 +73,13 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
       // const imageUrl = await uploadProfilePicture(file, user.id);
 
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('id', user.id);
-  
+      formData.append("file", file);
+      formData.append("id", user.id);
+
       // Make a POST request to the API
-      const { data } = await axios.post('/api/aws-profile', 
-        formData,        
-        {
+      const { data } = await axios.post("/api/aws-profile", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -117,7 +108,7 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
   // };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/share/${user.id}`;
+    const shareUrl = `${window.location.origin}/profile/${user.id}`;
     await navigator.clipboard.writeText(shareUrl);
     toast({ title: "Profile link copied to clipboard!" });
   };
@@ -137,50 +128,47 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
         </div>
       </div> */}
 
-<div className="relative h-64 bg-gradient-to-r from-rose-400 to-purple-400">
-  <div className="absolute bottom-0 w-full">
-    <svg
-      viewBox="0 0 1440 320"
-      className="w-full"
-    >
-      <path
-        fill="currentColor"
-        className="text-rose-50"
-        d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,224C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-      ></path>
-    </svg>
-  </div>
+      <div className="relative h-64 bg-gradient-to-r from-rose-400 to-purple-400">
+        <div className="absolute bottom-0 w-full">
+          <svg viewBox="0 0 1440 320" className="w-full">
+            <path
+              fill="currentColor"
+              className="text-rose-50"
+              d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,224C1248,203,1344,181,1392,170.7L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+            ></path>
+          </svg>
+        </div>
 
-  {/* Cover Photo Section */}
-  <div className="absolute top-0 left-0 w-full h-full">
-    <img
-      src={user.coverPhotoUrl || "https://via.placeholder.com/1440x320/0000FF/808080?Text=Cover+Photo"} // Fallback image
-      alt="Cover Photo"
-      className="w-full h-full object-cover"
-    />
+        {/* Cover Photo Section */}
+        <div className="absolute top-0 left-0 w-full h-full">
+          <img
+            src={
+              user.coverPhotoUrl ||
+              "https://via.placeholder.com/1440x320/0000FF/808080?Text=Cover+Photo"
+            } // Fallback image
+            alt="Cover Photo"
+            className="w-full h-full object-cover"
+          />
 
-    {/* Upload Button for Cover Photo */}
-    {isCurrentUser && (
-      <label
-        htmlFor="coverPhoto"
-        className="absolute top-2 right-2 bg-gradient-to-r from-rose-400 to-purple-400 cursor-pointer rounded-full p-2"
-      >
-        <Camera className="w-5 h-5 text-white" />
-        <input
-          type="file"
-          id="coverPhoto"
-          className="hidden"
-          accept="image/*"
-          onChange={handleCoverPhotoChange}
-          disabled={uploading}
-        />
-      </label>
-    )}
-  </div>
-</div>
-
-
-      
+          {/* Upload Button for Cover Photo */}
+          {isCurrentUser && (
+            <label
+              htmlFor="coverPhoto"
+              className="absolute top-2 right-2 bg-gradient-to-r from-rose-400 to-purple-400 cursor-pointer rounded-full p-2"
+            >
+              <Camera className="w-5 h-5 text-white" />
+              <input
+                type="file"
+                id="coverPhoto"
+                className="hidden"
+                accept="image/*"
+                onChange={handleCoverPhotoChange}
+                disabled={uploading}
+              />
+            </label>
+          )}
+        </div>
+      </div>
 
       <div className="container">
         <div className="relative -mt-32 mb-8">
@@ -190,29 +178,45 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
               <div className="relative">
                 <div className="w-40 h-40 rounded-full bg-gradient-to-r from-rose-400 to-purple-400 p-1">
                   <Avatar className="w-full h-full border-4 border-background">
-                  <img
-                    src={user.profileUrl ? user.profileUrl : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`}
-                    alt={user.name}
-                    className="w-full h-full object-cover"
-                  />
-
+                    <img
+                      src={
+                        user.profileUrl
+                          ? user.profileUrl
+                          : `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`
+                      }
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
                   </Avatar>
                 </div>
                 {isCurrentUser && (
-                  <label
-                    htmlFor="profilePicture"
-                    className="absolute -bottom -right-1 bg-gradient-to-r from-rose-400 to-purple-400 cursor-pointer rounded-full p-2 shadow-lg"
-                  >
-                    <Camera className="w-5 h-5 text-white" />
-                    <input
-                      type="file"
-                      id="profilePicture"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleProfilePictureChange}
-                      disabled={uploading}
-                    />
-                  </label>
+                  <div className="flex mt-2 mb-4 justify-center gap-x-6">
+                    <div className="">
+                      <label
+                        htmlFor="profilePicture"
+                        className="absolute -bottom -left-1 bg-gradient-to-r from-rose-400 to-purple-400 cursor-pointer rounded-full p-2 shadow-lg"
+                      >
+                        <Camera className="w-5 h-5 text-white" />
+                        <input
+                          type="file"
+                          id="profilePicture"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleProfilePictureChange}
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleShare}
+                      className="absolute -bottom -right-1 md:hidden"
+                    >
+                      <Share2 className="h-4 w-4" />
+                      {copied ? "Copied!" : "Share Profile"}
+                    </Button>
+                  </div>
                 )}
               </div>
 

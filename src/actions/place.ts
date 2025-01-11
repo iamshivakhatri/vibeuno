@@ -183,6 +183,7 @@ export async function getUserPlaces(userId: string): Promise<Place[]> {
         city: true,
         category: true,
         imageUrl: true,
+        image: true,
         createdAt: true,
         _count: {
           select: {

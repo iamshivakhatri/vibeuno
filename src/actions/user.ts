@@ -140,11 +140,7 @@ export const getUserById = async (userId: string) => {
   try {
 
     // first check if the user is authenticated
-    const checkUser = await currentUser();
-    if (!checkUser) {
-      return { status: 403, message: 'User not authenticated' };
-    }
-
+    
 
 
     // Fetch the user from the database
@@ -155,7 +151,10 @@ export const getUserById = async (userId: string) => {
       },
     });
 
-
+    const checkUser = await currentUser();
+    if (!checkUser) {
+      return { status: 403, user };
+    }
     
     if (!user) {
       return { status: 404, message: 'User not found' };
@@ -265,6 +264,7 @@ export const getShareUserById = async (userId: string) => {
 
 export async function getProfileData(userId: string) {
   try {
+    console.log('Fetching profile data for user:', userId);
     // Fetch user data with counts for places and votes
     const user = await prisma.user.findUnique({
       where: { id: userId },
