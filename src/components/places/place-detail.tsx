@@ -613,6 +613,7 @@ export function PlaceDetail({
           {visitors?.map((visitor) => (
             <Link 
             href={`/profile/${visitor.id}`} 
+            key={visitor.id}
             >
             <Avatar key={visitor.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white">
               <AvatarImage src={visitor.profileUrl} />
