@@ -34,7 +34,7 @@ export default async function ProfilePage({ params }: { params: { id: string } }
       <ProfileHeader user={profileData} isCurrentUser={isCurrentUser} />
       
       <div className="container py-8">
-        <PlaceTabs userId={profileData.id} />
+        <PlaceTabs userId={profileData.id}  />
       </div>
     </div>
   );

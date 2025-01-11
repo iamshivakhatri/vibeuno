@@ -13,7 +13,6 @@ export async function getAppUserId(clerkId: string) {
         },
       });
     console.log('User:', user);
-    console.log('bunger and bun ger', user?.id);
 
     return user?.id ?? null;
   } catch (error) {

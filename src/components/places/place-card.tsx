@@ -8,6 +8,9 @@ import { voteForPlace } from '@/actions/place';
 import { useAuth } from '@/lib/auth';
 import { toast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { hasUserVotedForPlace, getPlaceVoteCount } from '@/actions/user';
 
 interface PlaceCardProps {
   place: {
@@ -18,75 +21,122 @@ interface PlaceCardProps {
     _count: { votes: number };
     city: string;
   };
+  viewMode?: 'grid' | 'list';
 }
 
-export function PlaceCard({ place }: PlaceCardProps) {
+export function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) {
   const { user } = useAuth();
-  console.log('User:', user?.id);
-  console.log('Place:', place);
-  const [votes, setVotes] = useState(place._count.votes);
-  const [hasVoted, setHasVoted] = useState(false);
-  const [isVoting, setIsVoting] = useState(false);
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const handleVote = async () => {
+  // Query to check if user has voted
+  const { data: hasVoted } = useQuery({
+    queryKey: ['hasVoted', place.id, user?.id],
+    queryFn: () => hasUserVotedForPlace(place.id, user?.id || ''),
+    enabled: !!user,
+  });
+
+  // Query for vote count
+  const { data: voteCount = place._count.votes } = useQuery({
+    queryKey: ['voteCount', place.id],
+    queryFn: () => getPlaceVoteCount(place.id),
+  });
+
+
+  // Vote mutation
+  const voteMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('User not authenticated');
+      return await voteForPlace(place.id, user.id);
+    },
+    onMutate: async () => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['voteCount', place.id] });
+      await queryClient.cancelQueries({ queryKey: ['hasVoted', place.id, user?.id] });
+
+      // Snapshot previous values
+      const previousVoteCount = queryClient.getQueryData(['voteCount', place.id]);
+      const previousHasVoted = queryClient.getQueryData(['hasVoted', place.id, user?.id]);
+
+      // Optimistically update
+      queryClient.setQueryData(['voteCount', place.id], (old: number) => 
+        previousHasVoted ? old - 1 : old + 1
+      );
+      queryClient.setQueryData(['hasVoted', place.id, user?.id], !previousHasVoted);
+
+      return { previousVoteCount, previousHasVoted };
+    },
+    onError: (err, variables, context) => {
+      // Revert optimistic updates on error
+      queryClient.setQueryData(['voteCount', place.id], context?.previousVoteCount);
+      queryClient.setQueryData(['hasVoted', place.id, user?.id], context?.previousHasVoted);
+      toast({ title: "Failed to vote", variant: "destructive" });
+    },
+    onSuccess: (data) => {
+      toast({ 
+        title: data.vote === 1 ? "Vote recorded!" : "Vote removed!" 
+      });
+    },
+    onSettled: () => {
+      // Refetch to ensure sync
+      queryClient.invalidateQueries({ queryKey: ['voteCount', place.id] });
+      queryClient.invalidateQueries({ queryKey: ['hasVoted', place.id, user?.id] });
+    },
+  });
+
+  const handleVote = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!user) {
       toast({ title: "Please sign in to vote", variant: "destructive" });
       return;
     }
-
-    if (!hasVoted && !isVoting) {
-      setIsVoting(true);
-      try {
-        const voteCount = await voteForPlace(place.id, user.id);
-        console.log('Vote:', voteCount); 
-        setVotes(voteCount.vote);
-        if(voteCount.vote == 1) {
-          toast({ title: "Vote recorded!" });
-        }else{
-          toast({ title: "Vote removed!" });
-        }
-
-
-
-      } catch (error) {
-        toast({ title: "Failed to vote", variant: "destructive" });
-      } finally {
-        setIsVoting(false);
-      }
-    }
+    voteMutation.mutate();
   };
 
+  const cardClassName = viewMode === 'list' 
+    ? "flex flex-row overflow-hidden group md:h-48"
+    : "overflow-hidden group";
+
+  const imageClassName = viewMode === 'list'
+    ? "w-1/3 relative"
+    : "aspect-[4/3] relative";
+
   return (
-    <Card className="overflow-hidden group">
-      <div className="aspect-[4/3] relative overflow-hidden">
+    <Card 
+      className={cardClassName}
+      onClick={() => router.push(`/places/${place.id}`)}
+      role="button"
+    >
+      <div className={imageClassName}>
         <Image
           src={place.imageUrl || `https://source.unsplash.com/featured/?${encodeURIComponent(place.name)},landmark`}
           alt={place.name}
-          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-          width={800}
-          height={600}
+          className="object-contain group-hover:scale-105 transition-transform duration-300"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
-      <CardContent className="p-4">
-        <h3 className="text-lg font-semibold mb-1">{place.name}</h3>
-        <p className="text-sm text-muted-foreground mb-2">{place.city}</p>
-        <p className="text-sm line-clamp-2">{place.description}</p>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between">
-        <Button
-          variant={hasVoted ? "secondary" : "outline"}
-          size="sm"
-          onClick={handleVote}
-          disabled={hasVoted || isVoting}
-          className="flex items-center gap-2"
-        >
-          <Heart className="h-4 w-4" />
-          <span>{votes}</span>
-        </Button>
-        <Button variant="link" className="text-sm">
-          View Details
-        </Button>
-      </CardFooter>
+      <div className={viewMode === 'list' ? 'flex-1' : ''}>
+        <CardContent className="p-4">
+          <h3 className="text-lg font-semibold mb-1">{place.name}</h3>
+          <p className="text-sm text-muted-foreground mb-2">{place.city}</p>
+          <p className="text-sm line-clamp-2">{place.description }</p>
+        </CardContent>
+        <CardFooter className="p-4 pt-0 flex justify-between">
+          <Button
+            variant={hasVoted ? "secondary" : "outline"}
+            size="sm"
+            onClick={handleVote}
+            disabled={voteMutation.isPending}
+            className="flex items-center gap-2"
+          >
+            <Heart 
+              className={`h-4 w-4 ${hasVoted ? 'fill-primary text-primary' : ''}`} 
+            />
+            <span>{voteCount}</span>
+          </Button>
+        </CardFooter>
+      </div>
     </Card>
   );
 }

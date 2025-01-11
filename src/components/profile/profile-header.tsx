@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Share2, MapPin, Award, Camera, Heart } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import { uploadProfilePicture } from "@/actions/user";
 import axios from "axios";
 
 type ProfileHeaderProps = {

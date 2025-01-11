@@ -20,31 +20,27 @@ export function Navbar() {
   const { user, isSignedIn } = useUser();
   const pathname = usePathname();
   const isHomePage = pathname === '/';
-  console.log('isHomePage:', isHomePage);
   const { signOut } = useClerk();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [profileUrl, setProfileUrl] = useState<string | null>(null); // Still keep it in state for rendering
 
-  
+  // Optimized profile URL query
+  const { data: profileUrl } = useQuery({
+    queryKey: ['profileUrl', user?.id],
+    queryFn: () => getProfileUrl(user?.id ?? ''),
+    enabled: !!isSignedIn && !!user?.id,
+    initialData: user?.imageUrl, // Use Clerk's image URL as initial data
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
 
-
-  useEffect(() => {
-    const fetchProfileUrl = async () => {
-      if (isSignedIn && user?.id) {
-        const url = await getProfileUrl(user.id); // Call the function to get the profile URL
-        setProfileUrl(url ?? null);
-      }
-    };
-
-    fetchProfileUrl();
-  }, [isSignedIn, user?.id]); // Dependency on sign-in status and user ID
-
-
-  const { data: appUserId = "", isLoading, isError, error } = useQuery({
-    queryKey: ['userId'],
-    queryFn: () => getAppUserId(user?.id ?? ''), // Ensure this function works and returns the correct value
-    enabled: !!user?.id,  // Ensure query is only run if user.id is available
+  // Optimized user ID query
+  const { data: appUserId = "", isLoading, isError } = useQuery({
+    queryKey: ['userId', user?.id],
+    queryFn: () => getAppUserId(user?.id ?? ''),
+    enabled: !!user?.id,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Handle loading and error states
@@ -194,9 +190,14 @@ export function Navbar() {
                 className="flex items-center focus:outline-none"
               >
                 <img
-                  src= { profileUrl || user?.imageUrl || '/default-avatar.png'}
+                  src={profileUrl || user?.imageUrl || '/default-avatar.png'}
                   alt="Profile"
                   className="w-8 h-8 rounded-full"
+                  loading="eager"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = user?.imageUrl || '/default-avatar.png';
+                  }}
                 />
               </button>
 

@@ -65,6 +65,7 @@ export function PlaceGrid({ state }: PlaceGridProps) {
               votes: place._count.votes || 0,
             },
             city: place.city,
+
           }}
         />
       ))}

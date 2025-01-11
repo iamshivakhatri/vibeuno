@@ -22,15 +22,20 @@ _count: {
     };
 };
 
-export function PlaceGrid({ places, viewMode }: PlaceGridProps) {
+export function PlaceGrid({ places, viewMode = 'grid' }: PlaceGridProps) {
   // Check if there are no places and display a message if none found
   if (!places || places.length === 0) {
-    return <div>No places found.</div>;
+    return <div className="flex items-center justify-center h-[250px]">No places found.</div>;
   }
+
+  // Define container classes based on viewMode
+  const containerClasses = viewMode === 'grid'
+    ? "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-6"
+    : "flex flex-col gap-4 mt-6 ";
 
   // Return a grid of place cards
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-6">
+    <div className={containerClasses}>
       {places.map((place) => (
         <PlaceCard
           key={place.id} // Use the place ID as the key for each card
@@ -44,6 +49,7 @@ export function PlaceGrid({ places, viewMode }: PlaceGridProps) {
             },
             city: place.city, // Place city
           }}
+       // Flag to indicate if the current user is the owner of the place
         />
       ))}
     </div>
