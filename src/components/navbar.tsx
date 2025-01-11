@@ -13,10 +13,14 @@ import { useClerk } from '@clerk/nextjs';
 import { getAppUserId } from '@/actions/auth';
 import { useQuery } from '@tanstack/react-query';
 import { getProfileUrl } from '@/actions/user';
+import { usePathname } from 'next/navigation';
+
 
 export function Navbar() {
   const { user, isSignedIn } = useUser();
-  console.log('User at the navbar:', user?.imageUrl);
+  const pathname = usePathname();
+  const isHomePage = pathname === '/';
+  console.log('isHomePage:', isHomePage);
   const { signOut } = useClerk();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -50,9 +54,15 @@ export function Navbar() {
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <MapPin className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">TravelVote</span>
+            <span className="text-xl font-bold">Vibeuno</span>
           </Link>
-          <NavigationMenu className="hidden md:flex">
+          {/* <NavigationMenu className={cn("hidden md:flex", )}> */}
+          <NavigationMenu className={cn(
+              "md:flex",
+              {
+                "hidden": isHomePage,
+              }
+            )}>
             <NavigationMenuList>
               <NavigationMenuItem>
                 <Link href="/explore" legacyBehavior passHref>
@@ -66,7 +76,7 @@ export function Navbar() {
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/add-place" legacyBehavior passHref>
+                <Link href="/upload" legacyBehavior passHref>
                   <NavigationMenuLink
                     className={cn(
                       'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50'
@@ -105,7 +115,9 @@ export function Navbar() {
           <span className="text-xl font-bold">Vibeuno</span>
         </Link>
 
-        <NavigationMenu className="hidden md:flex">
+        {/* <NavigationMenu className="hidden md:flex"> */}
+        <NavigationMenu className={cn({"md:flex": !isHomePage}, "hidden")}>
+
           <NavigationMenuList>
             <NavigationMenuItem>
               <Link href="/explore" legacyBehavior passHref>
@@ -119,7 +131,7 @@ export function Navbar() {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/add-place" legacyBehavior passHref>
+              <Link href="/upload" legacyBehavior passHref>
                 <NavigationMenuLink
                   className={cn(
                     'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50'
@@ -158,7 +170,7 @@ export function Navbar() {
               </Link>
             </li>
             <li>
-              <Link href="/add-place" legacyBehavior passHref>
+              <Link href="/upload" legacyBehavior passHref>
                 <a
                   className="block rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
                   onClick={() => setMobileMenuOpen(false)}
@@ -170,9 +182,9 @@ export function Navbar() {
           </ul>
         </div>
       )}
-          <Button variant="ghost" size="icon">
+          {/* <Button variant="ghost" size="icon">
             <Search className="h-5 w-5" />
-          </Button>
+          </Button> */}
 
           {/* Custom Dropdown for Profile */}
           {isSignedIn ? (

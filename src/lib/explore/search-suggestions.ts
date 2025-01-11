@@ -37,7 +37,7 @@ export async function getSearchSuggestions(query: string): Promise<string[]> {
   try {
     // Fetch results from GeoNames API
     const response = await fetch(
-      `https://api.geonames.org/searchJSON?` +
+      `http://api.geonames.org/searchJSON?` +
       `name_startsWith=${encodeURIComponent(query)}` +
       `&maxRows=5` +
       `&username=shivakhatri01` +
