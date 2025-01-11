@@ -28,8 +28,12 @@ export default function UploadPage() {
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.length >= 2) {
+        try {
         const suggestions = await getSearchSuggestions(searchQuery);
         setSuggestions(suggestions);
+        }catch(error){
+          console.error('Error fetching suggestions:', error);
+        }
       } else {
         setSuggestions([]);
       }

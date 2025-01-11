@@ -1,17 +1,3 @@
-// export const CITY_SUGGESTIONS = [
-//   "Cincinnati, Ohio, USA",
-//   "Cinque Terre, Italy",
-//   "Cingoli, Italy",
-//   "Cienfuegos, Cuba",
-//   "Cinnaminson, New Jersey, USA"
-// ];
-
-// export function getSearchSuggestions(query: string): string[] {
-//   const normalizedQuery = query.toLowerCase();
-//   return CITY_SUGGESTIONS.filter(city => 
-//     city.toLowerCase().startsWith(normalizedQuery)
-//   );
-// }
 
 // Types for GeoNames API response
 interface GeoNamesResult {
@@ -34,17 +20,17 @@ export async function getSearchSuggestions(query: string): Promise<string[]> {
     return [];
   }
 
+   // Dynamically set the protocol based on the current environment
+   const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+   const BASE_API_URL = `${protocol}//api.geonames.org`;
+
+   console.log('BASE_API_URL:', BASE_API_URL);
+ 
+   const apiUrl = `${BASE_API_URL}/searchJSON?name_startsWith=${encodeURIComponent(query)}&maxRows=5&username=shivakhatri01&style=FULL&featureClass=P&orderby=population`;
+
   try {
     // Fetch results from GeoNames API
-    const response = await fetch(
-      `http://api.geonames.org/searchJSON?` +
-      `name_startsWith=${encodeURIComponent(query)}` +
-      `&maxRows=5` +
-      `&username=shivakhatri01` +
-      `&style=FULL` +
-      `&featureClass=P` +
-      `&orderby=population`
-    );
+    const response = await fetch(apiUrl);
 
     if (!response.ok) {
       throw new Error('Failed to fetch suggestions');

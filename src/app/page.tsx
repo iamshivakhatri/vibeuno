@@ -7,8 +7,7 @@ import Image from 'next/image';
 import { TopContributors } from '@/components/top-contributors';
 import Link from 'next/link';
 import {Footer} from '@/components/footer';
-import {Navbar} from '@/components/navbar';
-import { SearchBar } from "@/components/explore/search-bar"; 
+
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -29,8 +28,6 @@ export default function Home() {
         const newShowStickyNav = window.scrollY > heroBottom - 100;
         setShowStickyNav(newShowStickyNav);
         
-        // Log directly inside the scroll event to check the value
-        console.log('scrollY:', window.scrollY, 'heroBottom:', heroBottom, 'showStickyNav:', newShowStickyNav);
       }
     };
   
