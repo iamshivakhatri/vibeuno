@@ -151,21 +151,110 @@ export function PhotoUpload({
   // }
 
 
+  // const uploadFiles = async () => {
+  //   if (!placeId) {
+  //     console.log("placeId:", placeId);
+  //     toast({
+  //       title: "Please select a place before uploading photos",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
+  
+  //   if (files.length === 0) {
+  //     toast({ 
+  //       title: "No photos selected for upload", 
+  //       variant: "destructive" 
+  //     });
+  //     return;
+  //   }
+  
+  //   setUploading(true);
+  //   setProgress(0);
+  
+  //   try {
+  //     // Step 1: Get presigned URLs
+  //     const formData = new FormData();
+  //     files.forEach((file) => formData.append("files", file));
+  //     formData.append("placeId", placeId);
+  //     formData.append("userId", user.id);
+  //     formData.append("category", category);
+  
+  //     const response = await fetch("/api/upload", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+
+  //     console.log("response back from the route.:", response);
+  
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.error || "Failed to get upload URLs");
+  //     }
+  
+  //     const { presignedData } = await response.json();
+  //     console.log("presignedData:", presignedData);
+  
+  //     // Step 2: Upload files to S3
+  //     const uploadPromises = files.map(async (file, index) => {
+  //       try {
+  //         const optimizedFile = await optimizeImage(file);
+          
+  //         const uploadResponse = await fetch(presignedData[index].presignedUrl, {
+  //           method: "PUT",
+  //           body: optimizedFile,
+  //           headers: {
+  //             "Content-Type": file.type,
+  //           },
+  //         });
+  
+  //         if (!uploadResponse.ok) {
+  //           throw new Error(`Failed to upload ${file.name}`);
+  //         }
+  
+  //         // Update progress
+  //         setProgress((prev) => prev + (100 / files.length));
+          
+  //         return presignedData[index].url;
+  //       } catch (error) {
+  //         console.error(`Error uploading ${file.name}:`, error);
+  //         throw error;
+  //       }
+  //     });
+  
+  //     const uploadedUrls = await Promise.all(uploadPromises);
+  
+  //     // Success handling
+  //     toast({ 
+  //       title: "Photos uploaded successfully"
+  //     });
+      
+  //     onUploadComplete(uploadedUrls);
+  
+  //     // Clean up
+  //     previews.forEach((preview) => URL.revokeObjectURL(preview));
+  //     setFiles([]);
+  //     setPreviews([]);
+  
+  //   } catch (error) {
+  //     console.error('Upload error:', error);
+  //     toast({ 
+  //       title: "Failed to upload photos"
+  //     });
+  //   } finally {
+  //     setUploading(false);
+  //     setProgress(0);
+  //   }
+  // };
+  
   const uploadFiles = async () => {
     if (!placeId) {
-      console.log("placeId:", placeId);
-      toast({
-        title: "Please select a place before uploading photos",
-        variant: "destructive",
-      });
+      toast({ title: "Please select a place before uploading photos", variant: "destructive" });
       return;
     }
   
     if (files.length === 0) {
-      toast({ 
-        title: "No photos selected for upload", 
-        variant: "destructive" 
-      });
+      toast({ title: "No photos selected for upload", variant: "destructive" });
       return;
     }
   
@@ -173,94 +262,61 @@ export function PhotoUpload({
     setProgress(0);
   
     try {
-      // Step 1: Get presigned URLs
-      const formData = new FormData();
-      files.forEach((file) => formData.append("files", file));
-      formData.append("placeId", placeId);
-      formData.append("userId", user.id);
-      formData.append("category", category);
-  
+      // Step 1: Request presigned URLs from your API
       const response = await fetch("/api/upload", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          placeId,
+          userId: user.id,
+          category,
+          fileNames: files.map((file) => file.name),
+        }),
       });
   
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to get upload URLs");
+        throw new Error(errorData.error || "Failed to get presigned URLs");
       }
   
       const { presignedData } = await response.json();
+
+      console.log("presignedData:", presignedData);
   
-      // Step 2: Upload files to S3
+      // Step 2: Upload files directly to S3
       const uploadPromises = files.map(async (file, index) => {
-        try {
-          const optimizedFile = await optimizeImage(file);
-          
-          const uploadResponse = await fetch(presignedData[index].presignedUrl, {
-            method: "PUT",
-            body: optimizedFile,
-            headers: {
-              "Content-Type": file.type,
-            },
-          });
+        const optimizedFile = await optimizeImage(file);
+        const uploadResponse = await fetch(presignedData[index].presignedUrl, {
+          method: "PUT",
+          body: optimizedFile,
+          headers: { "Content-Type": file.type },
+        });
   
-          if (!uploadResponse.ok) {
-            throw new Error(`Failed to upload ${file.name}`);
-          }
-  
-          // Update progress
-          setProgress((prev) => prev + (100 / files.length));
-          
-          return presignedData[index].url;
-        } catch (error) {
-          console.error(`Error uploading ${file.name}:`, error);
-          throw error;
+        if (!uploadResponse.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
         }
+  
+        setProgress((prev) => prev + (100 / files.length)); // Update progress
+        return presignedData[index].url; // Return the uploaded file URL
       });
   
       const uploadedUrls = await Promise.all(uploadPromises);
   
       // Success handling
-      toast({ 
-        title: "Photos uploaded successfully"
-      });
-      
+      toast({ title: "Photos uploaded successfully" });
       onUploadComplete(uploadedUrls);
   
-      // Clean up
-      previews.forEach((preview) => URL.revokeObjectURL(preview));
       setFiles([]);
       setPreviews([]);
-  
     } catch (error) {
-      console.error('Upload error:', error);
-      toast({ 
-        title: "Failed to upload photos"
-      });
+      console.error("Upload error:", error);
+      toast({ title: "Failed to upload photos" });
     } finally {
       setUploading(false);
       setProgress(0);
     }
   };
   
-  // Helper function for image optimization
-  // async function optimizeImage(file: File): Promise<Blob> {
-  //   try {
-  //     const options = {
-  //       maxSizeMB: 1,
-  //       maxWidthOrHeight: 2000,
-  //       useWebWorker: true,
-  //     };
-  
-  //     const compressedFile = await imageCompression(file, options);
-  //     return compressedFile;
-  //   } catch (error) {
-  //     console.error('Image compression failed:', error);
-  //     return file; // Return original file if compression fails
-  //   }
-  // }
-
 
   async function optimizeImage(file: File): Promise<Blob> {
     // You'll need to install a client-side image processing library like browser-image-compression

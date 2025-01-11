@@ -107,6 +107,97 @@
 // }
 
 // api/upload/route.ts
+// import { NextResponse } from 'next/server';
+// import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+// import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+// import { v4 as uuidv4 } from 'uuid';
+// import { prisma } from "@/lib/db";
+
+// const s3Client = new S3Client({
+//   region: process.env.AWS_REGION!,
+//   credentials: {
+//     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+//     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+//   },
+// });
+
+// export async function POST(request: Request) {
+//   try {
+//     const formData = await request.formData();
+//     const filesInfo = formData.getAll('files')
+//       .filter((entry): entry is File => entry instanceof File)
+//       .map((file) => ({
+//         name: file.name,
+//         type: file.type
+//       }));
+//     const placeId = formData.get('placeId') as string;
+//     const clerkId = formData.get('userId') as string;
+//     const category = formData.get('category') as string;
+
+//     // Fetch user based on clerkId
+//     const user = await prisma.user.findUnique({
+//       where: { clerkId: clerkId }
+//     });
+
+//     if (!user) {
+//       throw new Error("User not found for the provided clerkId");
+//     }
+
+//     const [city, rawState, rawCountry] = placeId.split(",").map((part) => part.trim());
+//     const state = rawState.replace(/^-/, "").replace(/^(.)/, (match) => match.toUpperCase());
+//     const country = rawCountry.replace(/^-/, "").replace(/^(.)/, (match) => match.toUpperCase());
+
+//     // Generate presigned URLs for each file
+//     const presignedData = await Promise.all(
+//       filesInfo.map(async (fileInfo) => {
+//         const key = `places/${city}/${uuidv4()}-${fileInfo.name}`;
+//         const putObjectCommand = new PutObjectCommand({
+//           Bucket: process.env.AWS_BUCKET_NAME!,
+//           Key: key,
+//           ContentType: fileInfo.type,
+//         });
+
+//         const presignedUrl = await getSignedUrl(s3Client, putObjectCommand, {
+//           expiresIn: 3600,
+//         });
+
+//         return {
+//           presignedUrl,
+//           key,
+//           url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+//         };
+//       })
+//     );
+
+//     // Create place in database with the expected URLs
+//     const newPlace = await prisma.place.create({
+//       data: {
+//         imageUrl: presignedData[0].url,
+//         image: presignedData.map(file => file.url),
+//         city,
+//         state,
+//         country,
+//         category,
+//         userId: user.id,
+//       }
+//     });
+
+//     return NextResponse.json({
+//       success: true,
+//       presignedData,
+//       placeId: newPlace.id
+//     });
+//   } catch (error) {
+//     console.error('Upload error:', error);
+//     return NextResponse.json(
+//       { success: false, error: 'Upload failed' },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+
+
 import { NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -123,38 +214,34 @@ const s3Client = new S3Client({
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const filesInfo = formData.getAll('files')
-      .filter((entry): entry is File => entry instanceof File)
-      .map((file) => ({
-        name: file.name,
-        type: file.type
-      }));
-    const placeId = formData.get('placeId') as string;
-    const clerkId = formData.get('userId') as string;
-    const category = formData.get('category') as string;
+    const body = await request.json(); // Expecting JSON payload
+    const { fileNames, placeId, userId, category } = body;
 
-    // Fetch user based on clerkId
+    console.log("filenames, placeId, userId, category", fileNames, placeId, userId, category);
+
+    // Fetch user based on userId
     const user = await prisma.user.findUnique({
-      where: { clerkId: clerkId }
+      where: { clerkId: userId },
     });
 
     if (!user) {
-      throw new Error("User not found for the provided clerkId");
+      throw new Error("User not found for the provided userId");
+
+
     }
 
-    const [city, rawState, rawCountry] = placeId.split(",").map((part) => part.trim());
-    const state = rawState.replace(/^-/, "").replace(/^(.)/, (match) => match.toUpperCase());
-    const country = rawCountry.replace(/^-/, "").replace(/^(.)/, (match) => match.toUpperCase());
+    const [city, rawState, rawCountry] = placeId.split(",").map((part: string) => part.trim());
+    const state = rawState.replace(/^-/, "").replace(/^(.)/, (match: string) => match.toUpperCase());
+    const country = rawCountry.replace(/^-/, "").replace(/^(.)/, (match: string) => match.toUpperCase());
 
     // Generate presigned URLs for each file
     const presignedData = await Promise.all(
-      filesInfo.map(async (fileInfo) => {
-        const key = `places/${city}/${uuidv4()}-${fileInfo.name}`;
+      fileNames.map(async (fileName: string) => {
+        const key = `places/${city}/${uuidv4()}-${fileName}`;
         const putObjectCommand = new PutObjectCommand({
           Bucket: process.env.AWS_BUCKET_NAME!,
           Key: key,
-          ContentType: fileInfo.type,
+          ContentType: "application/octet-stream", // Default content type
         });
 
         const presignedUrl = await getSignedUrl(s3Client, putObjectCommand, {
@@ -172,20 +259,20 @@ export async function POST(request: Request) {
     // Create place in database with the expected URLs
     const newPlace = await prisma.place.create({
       data: {
-        imageUrl: presignedData[0].url,
+        imageUrl: presignedData[0]?.url || null,
         image: presignedData.map(file => file.url),
         city,
         state,
         country,
         category,
         userId: user.id,
-      }
+      },
     });
 
     return NextResponse.json({
       success: true,
       presignedData,
-      placeId: newPlace.id
+      placeId: newPlace.id,
     });
   } catch (error) {
     console.error('Upload error:', error);
