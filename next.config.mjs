@@ -25,6 +25,19 @@ const nextConfig = {
         },
       ],
     },
+    async headers() {
+      return [
+        {
+          source: '/api/:path*',
+          headers: [
+            {
+              key: 'max-body-size',
+              value: '50mb',
+            },
+          ],
+        },
+      ];
+    },
   };
   
   export default nextConfig;
