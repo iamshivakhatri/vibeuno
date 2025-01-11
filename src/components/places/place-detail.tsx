@@ -611,10 +611,14 @@ export function PlaceDetail({
         <h3 className="font-semibold mb-2">Visitors</h3>
         <div className="flex -space-x-2 overflow-hidden">
           {visitors?.map((visitor) => (
+            <Link 
+            href={`/profile/${visitor.id}`} 
+            >
             <Avatar key={visitor.id} className="inline-block h-8 w-8 rounded-full ring-2 ring-white">
               <AvatarImage src={visitor.profileUrl} />
               <AvatarFallback>{visitor.name[0]}</AvatarFallback>
             </Avatar>
+            </Link>
           ))}
         </div>
       </div>
