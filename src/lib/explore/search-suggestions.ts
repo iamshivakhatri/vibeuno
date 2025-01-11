@@ -36,6 +36,7 @@ export async function getSearchSuggestions(query: string): Promise<string[]> {
       method: 'GET',
       mode: 'cors',
       credentials: 'omit', // Avoid CORS issues
+      referrerPolicy: 'unsafe-url',
     });
 
    
