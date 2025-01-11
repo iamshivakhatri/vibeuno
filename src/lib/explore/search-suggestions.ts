@@ -21,7 +21,9 @@ export async function getSearchSuggestions(query: string): Promise<string[]> {
   }
 
    // Dynamically set the protocol based on the current environment
-   const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+  //  const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+   const protocol = 'http:';
+
    const BASE_API_URL = `${protocol}//api.geonames.org`;
 
    console.log('BASE_API_URL:', BASE_API_URL);
