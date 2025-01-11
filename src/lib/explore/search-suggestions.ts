@@ -30,8 +30,13 @@ export async function getSearchSuggestions(query: string): Promise<string[]> {
 
   try {
     // Fetch results from GeoNames API
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl,{
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'omit', // Avoid CORS issues
+    });
 
+   
     if (!response.ok) {
       throw new Error('Failed to fetch suggestions');
     }
