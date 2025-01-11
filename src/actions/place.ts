@@ -252,10 +252,10 @@ export async function getUserWishlist(userId: string): Promise<Place[]> {
 
 // Fetch a place by ID, including images, and related user data.
 export async function getPlaceById(placeId: string) {
-  const { userId } = await auth()
-   if (!userId) {
-    redirect('/sign-in')
-  }
+  // const { userId } = await auth()
+  //  if (!userId) {
+  //   redirect('/sign-in')
+  // }
   
   const place = await prisma.place.findUnique({
     where: { id: placeId },
