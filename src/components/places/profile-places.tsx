@@ -49,6 +49,7 @@ export function PlaceGrid({ places, viewMode = 'grid' }: PlaceGridProps) {
               votes: place._count.votes || 0, // Place votes count (defaults to 0 if undefined)
             },
             city: place.city, // Place city
+            image: place.image // List of image URLs associated with the place
           }}
        // Flag to indicate if the current user is the owner of the place
         />

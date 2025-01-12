@@ -18,6 +18,7 @@ interface PlaceCardProps {
     name: string;
     description: string;
     imageUrl?: string | null | undefined;
+    image?: string[];
     _count: { votes: number };
     city: string;
   };
@@ -28,6 +29,8 @@ export function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  console.log('place at the ', place);
 
   // Query to check if user has voted
   const { data: hasVoted } = useQuery({
@@ -107,15 +110,19 @@ export function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) {
       onClick={() => router.push(`/places/${place.id}`)}
       role="button"
     >
-      <div className={imageClassName}>
-        <Image
-          src={place.imageUrl || `https://source.unsplash.com/featured/?${encodeURIComponent(place.name)},landmark`}
-          alt={place.name}
-          className="object-contain group-hover:scale-105 transition-transform duration-300"
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-      </div>
+      <div className={`${imageClassName} relative`}>
+      <Image
+        src={place.imageUrl || `https://source.unsplash.com/featured/?${encodeURIComponent(place.name)},landmark`}
+        alt={place.name}
+        className="object-contain group-hover:scale-105 transition-transform duration-300"
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+ 
+     </div>
+
+  
+
       <div className={viewMode === 'list' ? 'flex-1' : ''}>
         <CardContent className="p-4">
           <h3 className="text-lg font-semibold mb-1">{place.name}</h3>
@@ -123,6 +130,7 @@ export function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) {
           <p className="text-sm line-clamp-2">{place.description }</p>
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between">
+          <div>
           <Button
             variant={hasVoted ? "secondary" : "outline"}
             size="sm"
@@ -135,6 +143,19 @@ export function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) {
             />
             <span>{voteCount}</span>
           </Button>
+          </div>
+          <Button
+            variant={hasVoted ? "secondary" : "outline"}
+            size="sm"
+            onClick={handleVote}
+            disabled={voteMutation.isPending}
+            className="flex items-center gap-2"
+          >
+                      <span> {place?.image ? `${place.image.length} photos` : 'No photos'}</span>
+
+
+          </Button>   
+   
         </CardFooter>
       </div>
     </Card>
