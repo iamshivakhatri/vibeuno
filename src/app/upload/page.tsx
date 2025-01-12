@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { PhotoUpload } from "@/components/explore/photo-upload";
 import { getSearchSuggestions } from "@/lib/explore/search-suggestions";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useQuery } from '@tanstack/react-query';
+
 import {
   Select,
   SelectTrigger,
@@ -14,6 +17,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { getAppUserId } from "@/actions/auth";
 
 export default function UploadPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,6 +28,16 @@ export default function UploadPage() {
   });
 
   const { user } = useUser();
+
+  const router = useRouter();
+
+  const { data: userId, isLoading, error } = useQuery({
+    queryKey: ['userId'],
+    queryFn: async () =>  getAppUserId(user?.id ?? ''),
+  });
+
+  
+
 
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -44,6 +58,8 @@ export default function UploadPage() {
 
   const handleUploadComplete = (urls: string[]) => {
     console.log("Uploaded photos:", urls);
+    setSearchQuery("");
+    router.push(`/profile/${userId}`);
   };
 
   return (
