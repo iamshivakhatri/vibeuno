@@ -46,7 +46,7 @@ export function Navbar() {
   // Handle loading and error states
   if (isLoading) {
     return (
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <MapPin className="h-6 w-6 text-primary" />
@@ -203,7 +203,7 @@ export function Navbar() {
 
               {dropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10"
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50"
                   onMouseLeave={() => setDropdownOpen(false)}
                 >
                   <ul className="py-2 text-sm text-gray-700">

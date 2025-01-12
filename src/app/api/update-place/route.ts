@@ -3,6 +3,8 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 import { prisma } from "@/lib/db";
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,
@@ -14,10 +16,8 @@ const s3Client = new S3Client({
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const files = formData.getAll('files') as File[];
-    const placeId = formData.get('placeId') as string;
-    const userId = formData.get('userId') as string;
+    const body = await request.json(); // Expecting JSON payload
+    const { fileNames, placeId, userId } = body;
 
     // Fetch place by placeId to get the current image list and city name
     const place = await prisma.place.findUnique({
@@ -29,61 +29,53 @@ export async function POST(request: Request) {
       },
     });
 
+
+    // return NextResponse.json({ success: true });  
+
     if (!place) {
       throw new Error("Place not found for the provided placeId");
     }
 
-    const currentImages: string[] = Array.isArray(place.image) ? place.image as string[] : []; // Ensure image is an array of strings
-
-    const uploadPromises = files.map(async (file) => {
-      const buffer = Buffer.from(await file.arrayBuffer());
-
-      // Optimize image while maintaining quality
-      const optimizedBuffer = await sharp(buffer)
-        .resize(2000, 2000, { // Max dimensions
-          fit: 'inside',
-          withoutEnlargement: true
-        })
-        .jpeg({ 
-          quality: 85,
-          progressive: true,
-          mozjpeg: true
-        })
-        .toBuffer();
-
-      // Use city name instead of placeId for S3 upload path
-      const cityName = place.city.toLowerCase(); // Handle spaces in city name
-      const key = `places/${cityName}/${uuidv4()}-${file.name}`;
-
-      // Upload to S3
-      await s3Client.send(new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: key,
-        Body: optimizedBuffer,
-        ContentType: file.type,
-      }));
-
-      return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-    });
-
-    // Upload images and get their URLs
-    const uploadedFiles = await Promise.all(uploadPromises);
+        // Generate presigned URLs for the new files
+        const presignedData = await Promise.all(
+          fileNames.map(async (fileName: string) => {
+            const key = `places/${place.city}/${uuidv4()}-${fileName}`;
+            const putObjectCommand = new PutObjectCommand({
+              Bucket: process.env.AWS_BUCKET_NAME!,
+              Key: key,
+              ContentType: "application/octet-stream", // Default content type
+            });
+    
+            const presignedUrl = await getSignedUrl(s3Client, putObjectCommand, {
+              expiresIn: 3600,
+            });
+    
+            return {
+              presignedUrl,
+              key,
+              url: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+            };
+          })
+        );
+    
 
 
-    // Update the place's image field by appending the new image URLs to the existing list
+    // Step 3: Update the place's image field by appending the new image URLs to the existing list
     const updatedPlace = await prisma.place.update({
       where: { id: placeId },
       data: {
-        image: [ ...currentImages, ...uploadedFiles],
-        imageUrl: uploadedFiles[0], // Assuming the first image is the cover image
+        image: [...(place.image as string[]), ...presignedData.map(file => file.url)],  // Append the new image URLs
       },
     });
 
     console.log('Updated place:', updatedPlace);
+    console.log('Presigned Data:', presignedData);
 
-    return NextResponse.json({ 
-      success: true, 
-      files: uploadedFiles,
+
+    return NextResponse.json({
+      success: true,
+      presignedData,
+      placeId: updatedPlace.id,
     });
   } catch (error) {
     console.error('Upload error:', error);

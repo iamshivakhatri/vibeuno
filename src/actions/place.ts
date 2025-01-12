@@ -646,3 +646,46 @@ export async function deleteImage(placeId: string, imageIndex: number) {
     return { success: false, error: 'Failed to delete image' };
   }
 }
+
+
+
+// export async function getPopularPlaces() {
+//   try {
+//     const places = await prisma.place.findMany({
+//       orderBy: {
+//         numVotes: 'desc'
+//       },
+//       take: 6, // Limit to top 6 places
+//     });
+//     console.log('Popular places:', places);
+//     return places;
+//   } catch (error) {
+//     console.error('Error fetching popular places:', error);
+//     return [];
+//   }
+// }
+
+export async  function getPopularPlaces() {
+  console.log('Fetching popular places...');
+
+  const places = await prisma.place.findMany({
+    orderBy: {
+      numVotes: 'desc',
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          profileUrl: true,
+        },
+      },
+    },
+    take: 6, // Limit to top 6 places
+  });
+  console.log('Popular places:', places);
+
+
+  return places;
+    
+}

@@ -54,17 +54,21 @@ export async function getContributor() {
           _count: 'desc',
         },
       },
-      take: 10,
+      take: 50,
     });
 
 
     // Map the contributors and calculate points
-    const topContributors = contributors.map(contributor => ({
+      const topContributors = contributors
+    .map(contributor => ({
       id: contributor.id,
       name: contributor.name || contributor.email.split('@')[0],
       profileUrl: contributor.profileUrl,
       points: (contributor._count.places * 5) + (contributor._count.votedPlaces * 3),
-    }));
+    }))
+    .sort((a, b) => b.points - a.points); // Sort by points in descending order
+
+
 
     return topContributors; // Return the result as an array
   } catch (error) {

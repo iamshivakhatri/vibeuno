@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 
 
 import { STATE_IMAGE_URLS } from '@/lib/states';
+import PopularPlaces from "@/components/places/popular-places"
 
 
 
@@ -116,8 +117,14 @@ export default function Home() {
         </div>
       </section>
 
+
+      {/* Featured Popular places section */}
+      <section>
+      <PopularPlaces />
+      </section>
+
       {/* Featured States Section */}
-      <section className="py-16 bg-background">
+      {/* <section className="py-16 bg-background">
       <div className="container">
         <h2 className="text-3xl font-semibold text-center mb-12">Popular States</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -144,7 +151,10 @@ export default function Home() {
           ))}
         </div>
       </div>
-    </section>
+    </section> */}
+
+
+
 
       {/* Top Contributors Section */}
       <TopContributors />

@@ -412,6 +412,9 @@ import { Card } from '@/components/ui/card';
 import { deletePlace, deleteImage, updateDescription } from '@/actions/place'
 import { toast } from "@/hooks/use-toast";
 import {MoreVertical,  Trash2, Upload, X,  Camera, Heart, MapPin, MoreHorizontal, Share2, Grid, ChevronLeft} from 'lucide-react'; // Import icons
+import { PhotoUpload } from '../explore/photo-upload';
+import { PhotoUpdate } from './photo-update';
+import { set } from 'date-fns';
 
 
 
@@ -541,7 +544,7 @@ export function PlaceDetail({
   return (
     <div className="max-w-screen-xl mx-auto">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-white  px-4 py-3">
+      <div className="sticky top-0 z-40 bg-white  px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="md:hidden">
@@ -663,7 +666,7 @@ export function PlaceDetail({
           ))}
         </div>
       ) : (
-        <div className="space-y-4 p-4">
+        <div className="space-y-4 p-4 md:w-6/12 md:m-auto">
           {place?.image?.map((image, index) => (
             <div 
               key={index}
@@ -765,15 +768,20 @@ export function PlaceDetail({
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Upload Photos</DialogTitle>
+            <DialogTitle>Update Photos</DialogTitle>
           </DialogHeader>
           <div className="grid w-full max-w-sm items-center gap-1.5">
-            <input
+            {/* <input
               type="file"
               multiple
               accept="image/*"
               onChange={handleFileUpload}
               className="cursor-pointer"
+            /> */}
+            <PhotoUpdate
+              placeId={place.id}
+              userId={userId}
+              onUploadComplete={()=> setIsUploadModalOpen(false)}
             />
           </div>
           <DialogFooter>
@@ -781,7 +789,9 @@ export function PlaceDetail({
               Cancel
             </Button>
           </DialogFooter>
-        </DialogContent>
+          
+      </DialogContent>
+       
       </Dialog>
 
       <Dialog 
