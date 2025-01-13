@@ -215,7 +215,7 @@ const s3Client = new S3Client({
 export async function POST(request: Request) {
   try {
     const body = await request.json(); // Expecting JSON payload
-    const { fileNames, placeId, userId, category } = body;
+    const { fileNames, placeId, userId, category, name  } = body;
 
     console.log("filenames, placeId, userId, category", fileNames, placeId, userId, category);
 
@@ -265,6 +265,7 @@ export async function POST(request: Request) {
         state,
         country,
         category,
+        name,
         userId: user.id,
       },
     });

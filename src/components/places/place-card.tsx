@@ -151,7 +151,7 @@ export function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) {
             disabled={voteMutation.isPending}
             className="flex items-center gap-2"
           >
-                      <span> {place?.image ? `${place.image.length} photos` : 'No photos'}</span>
+             <span> {place?.image ? `${place.image.length} photos` : 'No photos'}</span>
 
 
           </Button>   

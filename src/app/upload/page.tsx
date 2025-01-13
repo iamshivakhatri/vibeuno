@@ -25,6 +25,7 @@ export default function UploadPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [formData, setFormData] = useState({
     category: "",
+    name: "",
   });
 
   const { user } = useUser();
@@ -35,6 +36,7 @@ export default function UploadPage() {
     queryKey: ['userId'],
     queryFn: async () =>  getAppUserId(user?.id ?? ''),
   });
+
 
   
 
@@ -59,7 +61,9 @@ export default function UploadPage() {
   const handleUploadComplete = (urls: string[]) => {
     console.log("Uploaded photos:", urls);
     setSearchQuery("");
-    router.push(`/profile/${userId}`);
+    if(userId){
+      router.push(`/profile/${userId}`);
+    }
   };
 
   return (
@@ -105,16 +109,15 @@ export default function UploadPage() {
 
           {/* Category Select */}
           <div>
-            {/* <h3 className="text-lg font-semibold mb-2">Select a Category</h3> */}
+            {/* Optional category selection */}
             <Select
               value={formData.category}
               onValueChange={(value) =>
                 setFormData((prev) => ({ ...prev, category: value }))
               }
-              required
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
+                <SelectValue placeholder="Select a category (Optional)" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="nature">Nature</SelectItem>
@@ -125,12 +128,25 @@ export default function UploadPage() {
             </Select>
           </div>
 
+          <div>
+            {/* Optional input field */}
+            <Input
+              placeholder="Enter the name of the place (Optional)"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
+            />
+          </div>
+
+
           {/* Photo Upload */}
           <div className="border-t pt-6">
             <h3 className="text-lg font-semibold mb-4">Upload Photos</h3>
             <PhotoUpload
               placeId={searchQuery.toLowerCase().replace(/\s+/g, "-")}
               category={formData.category} // Pass category as a prop
+              name={formData.name} // Pass name as a prop
               onUploadComplete={handleUploadComplete}
               user={user}
             />

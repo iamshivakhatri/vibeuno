@@ -292,6 +292,10 @@ export async function getProfileData(userId: string) {
       clerkId: user.clerkId || null,
       email: user.email,
       name: user.name || 'Anonymous',
+      university: user.university,
+      location: user.location,
+      occupation: user.occupation, 
+      interests: user.interests,
       createdAt: user.createdAt.toISOString(),
       placesCount: user.places.length, // Count of places created by the user
       votesCount: user.votedPlaces.length,  // Count of votes made by the user
@@ -414,3 +418,19 @@ export async function getPlaceVoteCount(placeId: string) {
 //     throw new Error('Migration failed');
 //   }
 // }
+
+
+// Server-side function to update user information
+export async function updateUserInfo(userId: string, key: string, value: string) {
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { [key]: value },
+    });
+
+    return user;
+  } catch (error) {
+    console.error("Error updating user info:", error);
+    throw new Error("Failed to update user information");
+  }
+}

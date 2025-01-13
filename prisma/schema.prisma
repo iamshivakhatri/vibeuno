@@ -40,6 +40,10 @@ model User {
   name      String?
   profileUrl    String?
   coverPhotoUrl String?
+  university String?
+  location  String?
+  occupation String?
+  interests String?
   createdAt DateTime @default(now())
   places    Place[]
   votedPlaces   Place[]  @relation("PlaceVotes") // Add this relation

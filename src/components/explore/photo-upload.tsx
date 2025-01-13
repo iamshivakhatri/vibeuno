@@ -13,6 +13,7 @@ interface PhotoUploadProps {
   onUploadComplete: (urls: string[]) => void;
   user: any;
   category: string;
+  name: string;
 }
 
 export function PhotoUpload({
@@ -20,6 +21,7 @@ export function PhotoUpload({
   onUploadComplete,
   user,
   category,
+  name
 }: PhotoUploadProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -76,6 +78,7 @@ export function PhotoUpload({
           placeId,
           userId: user.id,
           category,
+          name,
           fileNames: files.map((file) => file.name),
         }),
       });

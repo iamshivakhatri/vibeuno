@@ -28,6 +28,12 @@ export default async function ProfilePage({ params }: { params: { id: string } }
   const userId = profileUser.user?.id;
   const profileData = await getProfileData(userId!);
 
+  // Convert null values to undefined for optional properties
+  profileData.location = profileData.location ?? null;
+  profileData.university = profileData.university ?? null;
+  profileData.occupation = profileData.occupation ?? null;
+  
+
   // Determine if the current user is viewing their own profile
   const isCurrentUser = user?.id === profileData.clerkId;
 
