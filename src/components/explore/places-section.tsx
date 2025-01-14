@@ -38,7 +38,7 @@ export function PlacesSection() {
         </div>
         <Button
           variant="ghost"
-          onClick={() => setExpanded(!expanded)}
+          onClick={() => router.push('/explore/places')}
           className="flex items-center gap-2"
         >
           {expanded ? "Show Less" : "View All"}
