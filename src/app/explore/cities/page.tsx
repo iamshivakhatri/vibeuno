@@ -40,7 +40,7 @@ export default function CitiesPage() {
           <div
             key={city.id}
             className="group cursor-pointer overflow-hidden rounded-xl border"
-            onClick={() => router.push(`/explore/cities/${city.id}`)}
+            onClick={() => router.push(`/places/${city.id}`)}
           >
             <div className="aspect-[16/9] relative">
               <Image

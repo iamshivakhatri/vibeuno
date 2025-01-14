@@ -34,10 +34,10 @@ export function Footer() {
           <div>
             <h3 className="mb-4 text-sm font-semibold">Explore</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/states" className="text-muted-foreground hover:text-primary transition-colors duration-300">States</Link></li>
-              <li><Link href="/cities" className="text-muted-foreground hover:text-primary transition-colors duration-300">Cities</Link></li>
-              <li><Link href="/top-places" className="text-muted-foreground hover:text-primary transition-colors duration-300">Top Places</Link></li>
-              <li><Link href="/itineraries" className="text-muted-foreground hover:text-primary transition-colors duration-300">Itineraries</Link></li>
+              <li><Link href="explore/people" className="text-muted-foreground hover:text-primary transition-colors duration-300">People</Link></li>
+              <li><Link href="explore/cities" className="text-muted-foreground hover:text-primary transition-colors duration-300">Cities</Link></li>
+              <li><Link href="explore/places" className="text-muted-foreground hover:text-primary transition-colors duration-300">Places</Link></li>
+              {/* <li><Link href="/itineraries" className="text-muted-foreground hover:text-primary transition-colors duration-300">Itineraries</Link></li> */}
             </ul>
           </div>
           
@@ -46,8 +46,8 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors duration-300">About</Link></li>
               <li><Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors duration-300">Contact</Link></li>
-              <li><Link href="/careers" className="text-muted-foreground hover:text-primary transition-colors duration-300">Careers</Link></li>
-              <li><Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors duration-300">Blog</Link></li>
+              {/* <li><Link href="/careers" className="text-muted-foreground hover:text-primary transition-colors duration-300">Careers</Link></li>
+              <li><Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors duration-300">Blog</Link></li> */}
             </ul>
           </div>
           
@@ -69,7 +69,7 @@ export function Footer() {
         </div>
         
         <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} TravelVote. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Vibeuno. All rights reserved.</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link href="/privacy" className="hover:text-primary transition-colors duration-300">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-primary transition-colors duration-300">Terms of Service</Link>
