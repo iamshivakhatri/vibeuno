@@ -434,3 +434,26 @@ export async function updateUserInfo(userId: string, key: string, value: string)
     throw new Error("Failed to update user information");
   }
 }
+
+export async function getUsers() {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profileUrl: true,
+        coverPhotoUrl: true,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 50 // Limit the number of users returned
+    });
+
+    return users;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
+}

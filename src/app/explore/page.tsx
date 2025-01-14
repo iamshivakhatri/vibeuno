@@ -20,14 +20,14 @@ export default function ExplorePage() {
               onChange={setSearchQuery}
             />
           </div>
-          <Button
+          {/* <Button
             variant="outline"
             className="flex items-center gap-2 min-w-[140px] bg-background hover:bg-accent  border-primary"
             onClick={() => window.location.href = '/states'}
           >
             <MapPinned className="h-4 w-4" />
             Explore States
-          </Button>
+          </Button> */}
         </div>
       </div>
 

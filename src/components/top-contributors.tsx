@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getContributor } from '@/actions/user';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import Loader from './global/loader';
 
 export function TopContributors() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export function TopContributors() {
   };
 
   if (isLoading) {
-    return <div  className='h-10 flex align-center justify-center'>Loading contributors...</div>;
+    return <Loader state={true} />;
   }
 
   if (error) {

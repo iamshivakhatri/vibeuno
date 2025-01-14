@@ -17,6 +17,9 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  console.log(searchQuery);
+
+
   useEffect(() => {
     async function fetchPlaceData() {
       setLoading(true);
@@ -104,6 +107,7 @@ export function SearchResults({ searchQuery }: SearchResultsProps) {
           showTopList
         />
       )}
+      
     </div>
   );
 }

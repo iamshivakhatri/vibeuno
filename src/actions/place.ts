@@ -62,97 +62,6 @@ export async function getPlaces(state: string) {
   });
 }
 
-// export async function voteForPlace(placeId: string, userId: string) {
-//   try {
-
-//     console.log('Voting for place:', { placeId, userId });
-//     // Check if the user exists
-//     const user = await prisma.user.findUnique({
-//       where: { clerkId: userId }
-//     });
-
-
-    
-
-//     if (!user) {
-//       throw new Error('User not found');
-//     }
-
-//     console.log('User:', user.id);
-
-//     // Proceed with creating the vote if the user exists
-//     return await prisma.vote.create({
-//       data: {
-//         placeId,
-//         userId:user.id
-//       }
-//     });
-//   } catch (error) {
-//     console.error('Error voting for place:', error);
-//     throw new Error('Unable to vote for place');
-//   }
-// }
-
-
-
-
-// export async function getUserPlaces(userId: string) {
-//   try {
-//     // Fetch the visited places associated with the given userId
-//     const places = await prisma.place.findMany({
-//       where: {
-//         userId: userId,  // Filter by userId to get visited places
-//       },
-//       select: {
-//         id: true,
-//         name: true,
-//         description: true,
-//         state: true,
-//         city: true,
-//         category: true,
-//         imageUrl: true,
-//         createdAt: true,
-//       },
-//     });
-
-//     return places;  // Returning the list of places
-//   } catch (error) {
-//     console.error('Error fetching visited places:', error);
-//     throw new Error('Error fetching visited places');
-//   }
-// }
-
-
-// export async function getUserWishlist(userId: string) {
-//   try {
-//     // Fetch the wishlist places associated with the given userId
-//     const wishlistPlaces = await prisma.wishlistItem.findMany({
-//       where: {
-//         userId: userId,  // Filter by userId to get wishlist places
-//       },
-//       include: {
-//         place: {  // Join with the Place model to get place details
-//           select: {
-//             id: true,
-//             name: true,
-//             description: true,
-//             state: true,
-//             city: true,
-//             category: true,
-//             imageUrl: true,
-//             createdAt: true,
-//           },
-//         },
-//       },
-//     });
-
-//     // Returning the list of places from the wishlist
-//     return wishlistPlaces.map((item) => item.place);
-//   } catch (error) {
-//     console.error('Error fetching wishlist places:', error);
-//     throw new Error('Error fetching wishlist places');
-//   }
-// }
 
 
 type Place = {
@@ -688,4 +597,90 @@ export async  function getPopularPlaces() {
 
   return places;
     
+}
+
+
+
+export async function updatePlaceDetails(placeId: string, data: { name: string }) {
+  try {
+    const response = await prisma.place.update({
+      where: { id: placeId },
+      data: { name: data.name }
+    });
+
+    revalidatePath(`/places/${placeId}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update place name:', error);
+    return { success: false };
+  }
+}
+
+export async function getPlacesData() {
+  try {
+    const places = await prisma.place.findMany({
+      where: {
+        name: {
+          not: null,
+        },
+        AND: {
+          name: {
+            not: '',
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        imageUrl: true,
+        category: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 50,
+    });
+
+    return places;
+  } catch (error) {
+    console.error("Error fetching places:", error);
+    return [];
+  }
+}
+
+
+
+
+export async function getCities() {
+  try {
+    const places = await prisma.place.findMany({
+      where: {
+        NOT: {
+          name: {
+            not: null, // Exclude places with non-null names
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        imageUrl: true,
+        category: true,
+        city: true,
+        country: true,
+        state: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 50,
+    });
+
+    return places;
+  } catch (error) {
+    console.error("Error fetching places:", error);
+    return [];
+  }
 }

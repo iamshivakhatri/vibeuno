@@ -3,6 +3,7 @@
 import { getPopularPlaces } from '@/actions/place';
 import PopularPlaceCard from './popular-place-card';
 import { useQuery } from '@tanstack/react-query';
+import Loader from '../global/loader';
 
 export default function PopularPlaces() {
   const { data: popularPlaces, isLoading, error } = useQuery({
@@ -10,7 +11,12 @@ export default function PopularPlaces() {
     queryFn: () => getPopularPlaces(),
   });
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return
+  (
+   <Loader state={true} />
+  )
+   
+   
   if (error) return <div>Error loading popular places.</div>;
   if (!popularPlaces || !popularPlaces.length) return null;
 
