@@ -47,7 +47,6 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
   const [value, setValue] = useState("");
   const queryClient = useQueryClient();
   const [localUser, setLocalUser] = useState(user); // Add local state to handle immediate updates
-  console.log('this is the user', localUser);
 
   const [editMode, setEditMode] = useState<{
     location: boolean;
@@ -369,30 +368,10 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
                   </div>
                 </div>
 
-                <div className="md:flex ">
+                <div className="md:flex md:gap-x-4 ">
                   {/* User Information */}
                   <div className="mt-8 pt-8 border-t">
-                    {/* <div className="flex items-center justify-between mb-4">
-                      {isCurrentUser && !user.location && !user.university && !user.occupation && (
-                        
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-muted-foreground hover:text-primary"
-                          onClick={() => {
-                            setEditMode({
-                              location: true,
-                              university: true,
-                              occupation: true,
-                              interests: true
-                            });
-                          }}
-                        >
-                          {/* <PlusCircle className="w-4 h-4 mr-2" />
-                          Add Your Info */}
-                          {/* </Button>
-                      )}
-                    </div> **/} 
+                   
                     
                     <div className="space-y-4">
                       {/* Location */}

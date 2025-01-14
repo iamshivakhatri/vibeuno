@@ -90,7 +90,6 @@ export function PhotoUpload({
   
       const { presignedData } = await response.json();
 
-      console.log("presignedData:", presignedData);
   
       // Step 2: Upload files directly to S3
       const uploadPromises = files.map(async (file, index) => {
