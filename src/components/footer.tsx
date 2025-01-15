@@ -51,7 +51,7 @@ export function Footer() {
             </ul>
           </div>
           
-          <div>
+          {/* <div>
             <h3 className="mb-4 text-sm font-semibold">Stay Connected</h3>
             <p className="text-sm text-muted-foreground mb-4">Subscribe to our newsletter for travel tips and exclusive offers.</p>
             <form className="flex space-x-2">
@@ -65,7 +65,7 @@ export function Footer() {
                 Subscribe
               </Button>
             </form>
-          </div>
+          </div> */}
         </div>
         
         <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
