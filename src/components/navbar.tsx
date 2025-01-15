@@ -212,11 +212,11 @@ export function Navbar() {
                         Profile
                       </Link>
                     </li>
-                    <li>
+                    {/* <li>
                       <Link href="/settings" className="block px-4 py-2 hover:bg-gray-100">
                         Settings
                       </Link>
-                    </li>
+                    </li> */}
                     <li>
                       <button 
                         onClick={() => signOut({ redirectUrl: '/' })}
