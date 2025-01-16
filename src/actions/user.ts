@@ -93,6 +93,8 @@ export const onAuthenticatedUser = async () => {
       },
     });
 
+
+
     
 
     // If the user exists, return the user
@@ -111,6 +113,8 @@ export const onAuthenticatedUser = async () => {
       return { status: 400, message: 'Email address is required' };
     }
 
+
+
     // Create a new user in the database
     const newUser = await prisma.user.create({
       data: {
@@ -127,6 +131,8 @@ export const onAuthenticatedUser = async () => {
     if (newUser) {
       return { status: 200, user: newUser };
     }
+
+    console.log('user created:', newUser);
 
     // In case user creation fails, return a 500 error
     return { status: 500, message: 'Failed to create user' };
@@ -268,7 +274,6 @@ export const getShareUserById = async (userId: string) => {
 
 export async function getProfileData(userId: string) {
   try {
-    console.log('Fetching profile data for user:', userId);
     // Fetch user data with counts for places and votes
     const user = await prisma.user.findUnique({
       where: { id: userId },

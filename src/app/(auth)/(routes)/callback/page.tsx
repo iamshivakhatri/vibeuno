@@ -6,7 +6,6 @@ const AuthCallbackPage = async () => {
 
   try {
     const auth = await onAuthenticatedUser()
-    console.log("This is auth", auth)
 
     if (auth.status === 200 || auth.status === 201) {
       // Set the redirect path to home

@@ -7,7 +7,6 @@ import nodemailer from 'nodemailer'
 
 export async function getAppUserId(clerkId: string) {
   try {
-    console.log('Fetching userId for clerkId:', clerkId);
  
 
     const user = await prisma.user.findUnique({
@@ -15,7 +14,6 @@ export async function getAppUserId(clerkId: string) {
           clerkId: clerkId 
         },
       });
-    console.log('User:', user);
 
     return user?.id ?? null;
   } catch (error) {

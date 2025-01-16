@@ -310,7 +310,6 @@ export async function updateDescription(placeId: string, description: string) {
 
 export async function voteForPlace(placeId: string, userId: string) {
   try {
-    console.log('Voting for place:', { placeId, userId });
 
     // Check if the user exists
     const user = await prisma.user.findUnique({
@@ -321,7 +320,6 @@ export async function voteForPlace(placeId: string, userId: string) {
       throw new Error('User not found');
     }
 
-    console.log('User:', user.id);
 
     // Get the place and check if user has already voted
     const place = await prisma.place.findUnique({
@@ -522,9 +520,7 @@ export async function deleteImage(placeId: string, imageIndex: number) {
     }
 
     const imagesArray = Array.isArray(place.image) ? place.image : [];
-    console.log('Images array:', imagesArray);
     const imageToDelete = imagesArray[imageIndex] as string;
-    console.log('Image to delete:', imageToDelete);
 
     if (!imageToDelete) {
       throw new Error('Image not found at specified index');
@@ -535,7 +531,6 @@ export async function deleteImage(placeId: string, imageIndex: number) {
 
     // Update the database after successful S3 deletion
     const updatedImages = imagesArray.filter((_, index) => index !== imageIndex);
-    console.log('Updated images:', updatedImages);
     
     await prisma.place.update({
       where: { id: placeId },
@@ -575,7 +570,6 @@ export async function deleteImage(placeId: string, imageIndex: number) {
 // }
 
 export async  function getPopularPlaces() {
-  console.log('Fetching popular places...');
 
   const places = await prisma.place.findMany({
     orderBy: {
@@ -592,7 +586,6 @@ export async  function getPopularPlaces() {
     },
     take: 6, // Limit to top 6 places
   });
-  console.log('Popular places:', places);
 
 
   return places;
