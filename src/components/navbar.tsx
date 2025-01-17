@@ -137,6 +137,18 @@ export function Navbar() {
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <Link href="/plan" legacyBehavior passHref>
+                <NavigationMenuLink
+                  className={cn(
+                    'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50'
+                  )}
+                >
+                  Plan Trip
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -172,6 +184,17 @@ export function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Add Place
+                </a>
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/plan" legacyBehavior passHref>
+                <a
+                  className="block rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Plan Trip
                 </a>
               </Link>
             </li>

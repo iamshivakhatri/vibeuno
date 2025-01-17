@@ -10,7 +10,7 @@ const corsOptions = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 }
 
-const isProtectedRoutes = createRouteMatcher(['/add-place(.*)', '/payment(.*)'])
+const isProtectedRoutes = createRouteMatcher(['/add-place(.*)', '/payment(.*)', '/upload(.*)'])
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const origin = req.headers.get('origin') ?? ''

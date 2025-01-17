@@ -60,6 +60,13 @@ export default function Home() {
              </Button>
             
             </Link>
+
+            <Link href="/plan" className="text-primary hover:text-primary/90 font-medium">
+             <Button>
+             Plan Trip
+             </Button>
+            
+            </Link>
           </div>
         </div>
       </div>
