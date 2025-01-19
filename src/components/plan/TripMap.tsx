@@ -12,6 +12,7 @@ interface TripMapProps {
 }
 
 export default function TripMap({ tripData }: TripMapProps) {
+  console.log("this is the tripdata", tripData)
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)

@@ -50,9 +50,9 @@ export async function addPlace(formData: {
 }
 
 
-export async function getPlaces(state: string) {
+export async function getPlaces(state?: string) {
   return prisma.place.findMany({
-    where: { state },
+    where: { state  },
     include: {
       _count: {
         select: { votes: true }
@@ -664,6 +664,54 @@ export async function getCities() {
         city: true,
         country: true,
         state: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 50,
+    });
+
+    return places;
+  } catch (error) {
+    console.error("Error fetching places:", error);
+    return [];
+  }
+}
+
+export async function getPost() {
+  try {
+    const places = await prisma.place.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        image: true,
+        city: true,
+        category: true,
+        caption: true,
+        numVotes: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profileUrl: true,
+          },
+        },
+        comments: {
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profileUrl: true,
+              },
+            },
+          },
+        },
+        createdAt: true,
       },
       orderBy: {
         createdAt: 'desc',

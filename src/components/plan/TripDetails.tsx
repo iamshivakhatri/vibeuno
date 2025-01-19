@@ -152,7 +152,7 @@ export default function TripDetails({ tripData }: TripDetailsProps) {
             ))}
           </div>
           <p className="text-2xl font-bold">
-            ${selectedHotelStars * 50} per night
+            ${selectedHotelStars * 30} per night
           </p>
         </CardContent>
       </Card>

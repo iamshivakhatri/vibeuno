@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Plus, X } from 'lucide-react'
 import { TripData, PlaceSuggestion } from '@/types/trip'
+import PlaceSuggestions from './PlaceSuggestions'
 
 interface TripFormProps {
   onPlanTrip: (data: Partial<TripData>) => void
@@ -16,7 +17,7 @@ const BASE_API_URL = "https://secure.geonames.org"
 export default function TripForm({ onPlanTrip }: TripFormProps) {
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
-  const [intermediateStops, setIntermediateStops] = useState<string[]>([''])
+  const [intermediateStops, setIntermediateStops] = useState<string[]>([])
   const [travelers, setTravelers] = useState(1)
   const [traveldays, setTravelDays] = useState(1)
   const [suggestions, setSuggestions] = useState<{ [key: string]: PlaceSuggestion[] }>({})
@@ -87,6 +88,11 @@ export default function TripForm({ onPlanTrip }: TripFormProps) {
     setSuggestions(prev => ({ ...prev, [key]: [] }))
   }
 
+  // const addIntermediateStop = () => {
+  //   setIntermediateStops(prev => [...prev, ''])
+  //   setSelectedPlaces(prev => ({ ...prev, [`intermediate_${intermediateStops.length}`]: null }))
+  // }
+
   const addIntermediateStop = () => {
     setIntermediateStops(prev => [...prev, ''])
     setSelectedPlaces(prev => ({ ...prev, [`intermediate_${intermediateStops.length}`]: null }))
@@ -115,13 +121,19 @@ export default function TripForm({ onPlanTrip }: TripFormProps) {
     }
 
     onPlanTrip({
-      stops: allStops.map(stop => ({
-        name: `${stop.name}, ${stop.adminName1}, ${stop.countryName}`,
-        coordinates: { lat: stop.lat, lng: stop.lng }
-      })),
+      stops: allStops.map((stop, index, array) => {
+        const isFirstOrLast = index === 0 || index === array.length - 1;
+        return {
+          name: isFirstOrLast ? `${stop.name}, ${stop.adminName1}, ${stop.countryName}` : stop.name,
+          coordinates: { lat: stop.lat, lng: stop.lng }
+        };
+      }),
       travelers,
       traveldays
-    })
+    });
+    
+
+
   }
 
   return (
@@ -160,7 +172,7 @@ export default function TripForm({ onPlanTrip }: TripFormProps) {
         </div>
       ))}
       
-      <Button type="button" variant="outline" onClick={addIntermediateStop} className="w-full">
+      <Button type="button" variant="outline" onClick={() => addIntermediateStop()} className="w-full">
         <Plus className="mr-2 h-4 w-4" /> Add Intermediate Stop
       </Button>
 
@@ -199,6 +211,15 @@ export default function TripForm({ onPlanTrip }: TripFormProps) {
           required
         />
       </div>
+
+
+      {selectedPlaces.origin && selectedPlaces.destination && (
+        <PlaceSuggestions
+          origin={selectedPlaces.origin}
+          destination={selectedPlaces.destination}
+          onAddStop={addIntermediateStop}
+        />
+      )}
 
       <Button type="submit" className="w-full">Plan Trip</Button>
     </form>
