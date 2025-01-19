@@ -12,6 +12,13 @@ interface TripFormProps {
   onPlanTrip: (data: Partial<TripData>) => void
 }
 
+interface Place {
+  name: string
+  description: string
+  lat: number
+  lng: number
+}
+
 const BASE_API_URL = "https://secure.geonames.org"
 
 export default function TripForm({ onPlanTrip }: TripFormProps) {
@@ -79,6 +86,7 @@ export default function TripForm({ onPlanTrip }: TripFormProps) {
         newStops[index] = `${place.name}, ${place.adminName1}, ${place.countryName}`
         return newStops
       })
+
     } else if (key === 'origin') {
       setOrigin(`${place.name}, ${place.adminName1}, ${place.countryName}`)
     } else if (key === 'destination') {
@@ -88,26 +96,106 @@ export default function TripForm({ onPlanTrip }: TripFormProps) {
     setSuggestions(prev => ({ ...prev, [key]: [] }))
   }
 
-  // const addIntermediateStop = () => {
-  //   setIntermediateStops(prev => [...prev, ''])
-  //   setSelectedPlaces(prev => ({ ...prev, [`intermediate_${intermediateStops.length}`]: null }))
-  // }
 
-  const addIntermediateStop = () => {
-    setIntermediateStops(prev => [...prev, ''])
-    setSelectedPlaces(prev => ({ ...prev, [`intermediate_${intermediateStops.length}`]: null }))
-  }
+  
 
-  const removeIntermediateStop = (index: number) => {
-    setIntermediateStops(prev => prev.filter((_, i) => i !== index))
+
+  
+const addIntermediateStop = () => {
+    setIntermediateStops(prev => [...prev, '']);
+    setSelectedPlaces(prev => ({ ...prev, [`intermediate_${intermediateStops.length}`]: null }));
+  };
+
+const addAIIntermediateStop = (place: Place) => {
+    const newIndex = intermediateStops.length
+    setIntermediateStops(prev => [...prev, place.name])
     setSelectedPlaces(prev => {
-      const newSelected = { ...prev }
-      delete newSelected[`intermediate_${index}`]
-      return newSelected
+      const newPlaces = {
+        ...prev,
+        [`intermediate_${newIndex}`]: {
+          name: place.name,
+          lat: place.lat,
+          lng: place.lng,
+          countryName: '', // You might want to add these if available from your AI suggestion
+          adminName1: ''
+        }
+      }
+      return newPlaces
     })
-  }
+}
+
+
+// const removeIntermediateStop = (index: number) => {
+//     setIntermediateStops(prev => prev.filter((_, i) => i !== index))
+//     setSelectedPlaces(prev => {
+//       const newSelected = { ...prev }
+//       delete newSelected[`intermediate_${index}`]
+//       return newSelected
+//     })
+//     console.log("this is the selected places", selectedPlaces)
+//     console.log("this is the intermediate stops", intermediateStops)
+//    const allStops = [
+//       selectedPlaces.origin,
+//       ...intermediateStops.map((_, index) => selectedPlaces[`intermediate_${index}`]),
+//       selectedPlaces.destination
+//     ].filter(Boolean) as PlaceSuggestion[]
+//     console.log("this is the all stops", allStops)  
+//     onPlanTrip({
+//       stops: allStops.map((stop, index, array) => {
+//         const isFirstOrLast = index === 0 || index === array.length - 1;
+//         return {
+//           name: isFirstOrLast ? `${stop.name}, ${stop.adminName1}, ${stop.countryName}` : stop.name,
+//           coordinates: { lat: stop.lat, lng: stop.lng }
+//         };
+//       }),
+//       travelers,
+//       traveldays
+//     });
+
+//   }
+
+const removeIntermediateStop = (index: number) => {
+  // Create local copies of the updated states
+  const updatedIntermediateStops = intermediateStops.filter((_, i) => i !== index);
+  const updatedSelectedPlaces = { ...selectedPlaces };
+  delete updatedSelectedPlaces[`intermediate_${index}`];
+
+  // Log the current state for debugging
+  console.log("this is the updated selected places", updatedSelectedPlaces);
+  console.log("this is the updated intermediate stops", updatedIntermediateStops);
+
+  // Calculate all stops based on the updated data
+  const allStops = [
+    updatedSelectedPlaces.origin,
+    ...updatedIntermediateStops.map((_, idx) => updatedSelectedPlaces[`intermediate_${idx}`]),
+    updatedSelectedPlaces.destination,
+  ].filter(Boolean) as PlaceSuggestion[];
+
+  console.log("this is the all stops", allStops);
+
+  // Call the onPlanTrip function with the updated data
+  onPlanTrip({
+    stops: allStops.map((stop, idx, array) => {
+      const isFirstOrLast = idx === 0 || idx === array.length - 1;
+      return {
+        name: isFirstOrLast
+          ? `${stop.name}, ${stop.adminName1}, ${stop.countryName}`
+          : stop.name,
+        coordinates: { lat: stop.lat, lng: stop.lng },
+      };
+    }),
+    travelers,
+    traveldays,
+  });
+
+  // Update the state afterward
+  setIntermediateStops(updatedIntermediateStops);
+  setSelectedPlaces(updatedSelectedPlaces);
+};
+
 
   const handleSubmit = async (e: React.FormEvent) => {
+    
     e.preventDefault()
     const allStops = [
       selectedPlaces.origin,
@@ -217,7 +305,7 @@ export default function TripForm({ onPlanTrip }: TripFormProps) {
         <PlaceSuggestions
           origin={selectedPlaces.origin}
           destination={selectedPlaces.destination}
-          onAddStop={addIntermediateStop}
+          onAddStop={addAIIntermediateStop}
         />
       )}
 

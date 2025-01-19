@@ -7,16 +7,62 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TripData } from '@/types/trip';
 import { MapPin, Users, DollarSign, Clock } from 'lucide-react';
-import { Compass as GasPump, UtensilsCrossed, Hotel } from 'lucide-react';
+import { Compass as GasPump, UtensilsCrossed, Hotel, MapIcon, Utensils, Loader2 } from 'lucide-react';
+import { useAISuggestions } from '@/hooks/useAISuggestions';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 
 interface TripDetailsProps {
   tripData: Partial<TripData>;
 }
 
+interface AISuggestions {
+  activities: string[]
+  food: string[]
+}
+
+interface Activity {
+  name: string;
+  description: string;
+}
+
+interface Food {
+  name: string;
+  description: string;
+}
+
+interface AiSuggestions {
+  activities: Activity[];
+  food: Food[];
+}
+
+const fetchAISuggestions = async (destination: string): Promise<AiSuggestions> => {
+  const response = await fetch('/api/ai-suggestions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ place: destination }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Server error: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
 export default function TripDetails({ tripData }: TripDetailsProps) {
   const [selectedHotelStars, setSelectedHotelStars] = useState(3);
   const [routeDetails, setRouteDetails] = useState<any>(null);
+  const [selectedDestination, setSelectedDestination] = useState<string | null>(null)
+  // const [aiSuggestions, setAiSuggestions] = useState<AISuggestions | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const queryClient = useQueryClient();
+
+ 
+
 
   useEffect(() => {
     if (tripData.stops && tripData.stops.length >= 2) {
@@ -30,6 +76,67 @@ export default function TripDetails({ tripData }: TripDetailsProps) {
         .then(setRouteDetails);
     }
   }, [tripData]);
+
+
+  // useEffect(() => {
+  //   const fetchAISuggestions = async () => {
+  //     if (!selectedDestination) return null;
+
+  //     setLoading(true);
+  //     setError(null);
+
+  //     try {
+  //       console.log('Fetching suggestions for destination:', selectedDestination);
+
+  //       const response = await fetch('/api/ai-suggestions', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({ place: selectedDestination }),
+  //       });
+
+  //       if (!response.ok) {
+  //         throw new Error(`Server error: ${response.statusText}`);
+  //       }
+
+  //       const data: AiSuggestions = await response.json();
+
+
+  //       console.log('AI suggestions received:', data);
+  //       setAiSuggestions(data);
+
+  //     } catch (error) {
+  //       if (error instanceof Error) {
+  //         console.error('Error fetching AI suggestions:', error.message);
+  //       } else {
+  //         console.error('Error fetching AI suggestions:', error);
+  //       }
+  //       setError('Failed to fetch suggestions. Please try again.');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchAISuggestions();
+  // }, [selectedDestination]);
+
+ const {
+    data: aiSuggestions,
+    isLoading,
+    isError,
+  } = useQuery<AiSuggestions, Error>({
+    queryKey: ['aiSuggestions', selectedDestination],
+    queryFn: () => selectedDestination ? fetchAISuggestions(selectedDestination) : Promise.reject('No destination selected'),
+    enabled: !!selectedDestination,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    // cacheTime: 30 * 60 * 1000, // Keep unused data in cache for 30 minutes
+    retry: 2, // Retry failed requests twice
+  });
+
+  
+
+  
 
   const calculateTripCost = () => {
     if (!routeDetails) return { total: 0, gasMoney: 0, foodMoney: 0, hotelMoney: 0 };
@@ -204,6 +311,172 @@ export default function TripDetails({ tripData }: TripDetailsProps) {
           <p className="text-2xl font-bold">${(parseFloat(tripCost.total as string) / (tripData.travelers || 1)).toFixed(2)}</p>
         </div>
       </div>
+    </Card>
+
+
+    {/* <Card>
+        <CardHeader>
+          <CardTitle className="text-xl font-bold flex items-center">
+            <MapPin className="mr-2" /> Destination Insights
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-lg font-semibold">Select a destination to see AI-generated suggestions:</p>
+            {tripData.stops?.map((stop, index) => (
+              <Button
+                key={index}
+                onClick={() => setSelectedDestination(stop.name)}
+                variant={selectedDestination === stop.name ? 'default' : 'outline'}
+              >
+                {stop.name}
+              </Button>
+            ))}
+          </div>
+          {selectedDestination && (
+            <div className="mt-6 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center">
+                    <MapIcon className="mr-2" /> Things to Do in {selectedDestination}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                      <p>Loading suggestions...</p>
+                    </div>
+                  ) : error ? (
+                    <p className="text-red-500">{error}</p>
+                  ) : aiSuggestions && aiSuggestions.activities.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-2">
+                      {aiSuggestions.activities.map((activity, index) => (
+                        <li key={index}>{activity}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>No suggestions available. Try selecting a different destination.</p>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold flex items-center">
+                    <Utensils className="mr-2" /> Food and Dining in {selectedDestination}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                      <p>Loading suggestions...</p>
+                    </div>
+                  ) : error ? (
+                    <p className="text-red-500">{error.toString()}</p>
+                  ) : aiSuggestions && aiSuggestions.food.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-2">
+                      {aiSuggestions.food.map((item, index) => (
+                        <li key={index}>{item}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>No suggestions available. Try selecting a different destination.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card> */}
+
+<Card>
+      <CardHeader>
+        <CardTitle className="text-xl font-bold flex items-center">
+          <MapPin className="mr-2" /> Destination Insights
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <p className="text-lg font-semibold">
+            Select a destination to see AI-generated suggestions:
+          </p>
+          {tripData.stops?.map((stop, index) => (
+            <Button
+              key={index}
+              onClick={() => setSelectedDestination(stop.name)}
+              variant={selectedDestination === stop.name ? 'default' : 'outline'}
+            >
+              {stop.name}
+            </Button>
+          ))}
+        </div>
+
+        {selectedDestination && (
+          <div className="mt-6 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold flex items-center">
+                  <MapIcon className="mr-2" /> Things to Do in {selectedDestination}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                    <p>Loading suggestions...</p>
+                  </div>
+                ) : isError ? (
+                  <p className="text-red-500">{error || 'An error occurred'}</p>
+                ) : aiSuggestions && aiSuggestions.activities.length > 0 ? (
+                  <ul className="list-disc pl-5 space-y-2">
+                    {aiSuggestions.activities.map((activity, index) => (
+                      <li key={index}>
+                        <strong>{activity.name}</strong> - {activity.description}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No suggestions available. Try selecting a different destination.</p>
+                )}
+                
+                
+                
+
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold flex items-center">
+                  <Utensils className="mr-2" /> Food and Dining in {selectedDestination}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                    <p>Loading suggestions...</p>
+                  </div>
+                ) : isError ? (
+                  <p className="text-red-500">An error occurred</p>
+                ) : aiSuggestions && aiSuggestions.food.length > 0 ? (
+                  <ul className="list-disc pl-5 space-y-2">
+                    {aiSuggestions.food.map((item, index) => (
+                      <li key={index}>
+                        <strong>{item.name}</strong> - {item.description}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No suggestions available. Try selecting a different destination.</p>
+                )}
+               
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </CardContent>
     </Card>
 
 
