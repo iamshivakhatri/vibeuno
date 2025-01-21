@@ -52,38 +52,7 @@ export function Navbar() {
             <MapPin className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">Vibeuno</span>
           </Link>
-          {/* <NavigationMenu className={cn("hidden md:flex", )}> */}
-          <NavigationMenu className={cn(
-              "md:flex",
-              {
-                "hidden": isHomePage,
-              }
-            )}>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <Link href="/explore" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50'
-                    )}
-                  >
-                    Explore
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Link href="/upload" legacyBehavior passHref>
-                  <NavigationMenuLink
-                    className={cn(
-                      'group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50'
-                    )}
-                  >
-                    Add Place
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+         
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
