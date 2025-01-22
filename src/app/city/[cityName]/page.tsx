@@ -1,57 +1,127 @@
-// "use client";
+"use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
-import { MapPin, Users, TrendingUp, Camera, Bookmark, MessageSquare } from "lucide-react";
+import {
+  MapPin,
+  Users,
+  TrendingUp,
+  Camera,
+  Bookmark,
+  MessageSquare,
+  Send,
+  ThumbsUp,
+  Link,
+} from "lucide-react";
 import Image from "next/image";
+import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getCityData } from "@/actions/place";
+import { useUser } from "@clerk/nextjs";
+import { getAppUserId } from "@/actions/auth";
+import { getProfileUrl } from "@/actions/user";
+import { useRouter } from "next/navigation";
 
-// This is required for static site generation with dynamic routes
-export function generateStaticParams() {
-  // Add all the cities you want to pre-render
-  return [
-    { cityName: 'new-york' },
-    { cityName: 'los-angeles' },
-    { cityName: 'chicago' },
-    { cityName: 'houston' },
-    { cityName: 'phoenix' },
-    { cityName: 'philadelphia' },
-    { cityName: 'san-antonio' },
-    { cityName: 'san-diego' },
-    { cityName: 'dallas' },
-    { cityName: 'san-jose' }
-  ];
-}
+// Types based on your schema
+type Place = {
+  id: string;
+  name: string | null;
+  caption?: string | null;
+  description?: string | null;
+  image?: string[];
+  imageUrl?: string | null;
+  category?: string | null;
+  numVotes: number | 0;
+  comments: Comment[];
+  user: User;
+  createdAt: string;
+};
+
+type User = {
+  id: string;
+  name?: string;
+  profileUrl?: string;
+  occupation?: string;
+};
+
+type Comment = {
+  id: string;
+  content: string;
+  user: User;
+  createdAt: string;
+  likes?: number;
+};
+
+const CATEGORIES = [
+  "All",
+  "Restaurants",
+  "Parks",
+  "Museums",
+  "Nightlife",
+  "Shopping",
+  "Architecture",
+  "Hidden Gems",
+];
 
 export default function CityPage() {
-  // const { cityName } = useParams();
+  const { user } = useUser();
+  const appUser = getAppUserId(user?.id ?? "");
+  const { cityName } = useParams();
+  const formattedCityName = cityName as string;
+  console.log("this is the city name", formattedCityName);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [newComment, setNewComment] = useState("");
+  const router = useRouter();
 
-  const cityName = 'dallas'
-  const formattedCityName = (cityName as string).replace(/-/g, ' ');
+  const { data: profileUrl } = useQuery({
+    queryKey: ["profileUrl", user?.id],
+    queryFn: () => getProfileUrl(user?.id ?? ""),
+    enabled: !!user?.id,
+    initialData: user?.imageUrl, // Use Clerk's image URL as initial data
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
 
-  // This would be replaced with real data from your API
+  const { data } = useQuery({
+    queryKey: ["hasVoted", cityName],
+    queryFn: () => getCityData(formattedCityName),
+  });
+
+  const mockPlaces: Place[] =
+    data?.[0]?.places.map((place: any) => ({
+      ...place,
+      comments: place.comments.map((comment: any) => ({
+        ...comment,
+        user: {
+          id: comment.userId,
+          name: comment.userName,
+          profileUrl: comment.userProfileUrl,
+          occupation: comment.userOccupation,
+        },
+      })),
+    })) || [];
+
   const cityStats = {
     members: 12453,
-    places: 342,
-    trending: "+24%"
+    places: mockPlaces?.length,
+    trending: "+24%",
   };
 
-  const featuredPlaces = [
-    {
-      id: 1,
-      name: "Central Park",
-      imageUrl: "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
-      votes: 1234,
-      comments: 89,
-      category: "Parks"
-    },
-    {
-      id: 2,
-      name: "Art Museum",
-      imageUrl: "https://images.unsplash.com/photo-1566665797739-1674de7a421a",
-      votes: 892,
-      comments: 45,
-      category: "Culture"
-    }
-  ];
+  const filteredPlaces =
+    selectedCategory === "All"
+      ? mockPlaces
+      : mockPlaces?.filter((place) => place.category === selectedCategory);
+
+  const handleComment = (placeId: string) => {
+    if (!newComment.trim()) return;
+    // Here you would typically make an API call to add the comment
+    console.log("Adding comment to place:", placeId, newComment);
+    setNewComment("");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,20 +136,22 @@ export default function CityPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
         <div className="absolute bottom-8 left-8 right-8">
-          <h1 className="text-4xl font-bold text-white mb-2">{formattedCityName}</h1>
-          <div className="flex gap-4 text-white/90">
-            <div className="flex items-center gap-2">
+          <h1 className="text-4xl font-bold text-black mb-2">
+            {formattedCityName}
+          </h1>
+          <div className="flex gap-4 text-black/90">
+            {/* <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               <span>{cityStats.members.toLocaleString()} members</span>
-            </div>
+            </div> */}
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               <span>{cityStats.places} places</span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" />
               <span>{cityStats.trending} this week</span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -87,41 +159,153 @@ export default function CityPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Featured Places */}
+          {/* Left Column - Places Feed */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold">Featured Places</h2>
-              <button className="text-primary hover:underline">View all</button>
-            </div>
-            
+            {/* Category Pills */}
+            <ScrollArea className="w-full whitespace-nowrap pb-4">
+              <div className="flex gap-2">
+                {CATEGORIES.map((category) => (
+                  <Button
+                    key={category}
+                    variant={
+                      selectedCategory === category ? "default" : "outline"
+                    }
+                    onClick={() => setSelectedCategory(category)}
+                    className="rounded-full"
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
+
             <div className="grid gap-6">
-              {featuredPlaces.map((place) => (
-                <div key={place.id} className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                  <div className="relative h-64">
+              {filteredPlaces?.map((place) => (
+                <div
+                  key={place.id}
+                  className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                >
+                  {/* User Info */}
+                  <div className="p-4 flex items-center gap-3 border-b">
+                    <Avatar className="h-10 w-10">
+                      <Image
+                        src={
+                          place.user.profileUrl ||
+                          "https://github.com/shadcn.png"
+                        }
+                        alt={place.user.name || "User"}
+                        width={40}
+                        height={40}
+                      />
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{place.user.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {place.user.occupation}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Image */}
+                  <div className="relative h-[400px]">
                     <Image
-                      src={place.imageUrl}
-                      alt={place.name}
+                      src={place?.image?.[0] || ""}
+                      alt={place?.name || "Place"}
                       fill
                       className="object-cover"
                     />
-                    <div className="absolute top-4 right-4 bg-black/50 px-3 py-1 rounded-full text-white text-sm">
+                    <Badge className="absolute top-4 right-4">
                       {place.category}
-                    </div>
+                    </Badge>
                   </div>
+
+                  {/* Content */}
                   <div className="p-4">
                     <h3 className="text-xl font-semibold mb-2">{place.name}</h3>
-                    <div className="flex items-center gap-4 text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="w-4 h-4" />
-                        <span>{place.votes}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
+                    <p className="text-muted-foreground mb-4">
+                      {place.description}
+                    </p>
+
+                    {/* Interactions */}
+                    <div className="flex items-center gap-4 text-muted-foreground mb-4">
+                      <Button variant="ghost" size="sm" className="gap-2">
+                        <ThumbsUp className="w-4 h-4" />
+                        <span>{place.numVotes}</span>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="gap-2">
                         <MessageSquare className="w-4 h-4" />
-                        <span>{place.comments}</span>
+                        <span>{place.comments.length}</span>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="ml-auto">
+                        <Bookmark className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    {/* Comments */}
+                    <div className="space-y-4">
+                      {place.comments.map((comment) => (
+                        <div key={comment.id} className="flex gap-3">
+                          <Avatar className="h-8 w-8">
+                            <Image
+                              src={
+                                comment.user.profileUrl ||
+                                "https://github.com/shadcn.png"
+                              }
+                              alt={comment.user.name || "User"}
+                              width={32}
+                              height={32}
+                            />
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="bg-accent rounded-lg p-3">
+                              <p className="font-semibold text-sm">
+                                {comment.user.name}
+                              </p>
+                              <p className="text-sm">{comment.content}</p>
+                            </div>
+                            <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                              <button className="hover:text-foreground">
+                                Like
+                              </button>
+                              <button className="hover:text-foreground">
+                                Reply
+                              </button>
+                              <span>
+                                {new Date(
+                                  comment.createdAt
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Add Comment */}
+                      <div className="flex gap-3 items-center">
+                        <Avatar className="h-8 w-8">
+                          <Image
+                            src={profileUrl || "https://github.com/shadcn.png"}
+                            alt="Your avatar"
+                            width={32}
+                            height={32}
+                          />
+                        </Avatar>
+                        <div className="flex-1 flex gap-2">
+                          <Textarea
+                            placeholder="Add a comment..."
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            className="min-h-0 h-9 py-2 resize-none"
+                          />
+                          <Button
+                            size="icon"
+                            onClick={() => handleComment(place.id)}
+                            disabled={!newComment.trim()}
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <button className="ml-auto text-primary hover:text-primary/80">
-                        <Bookmark className="w-5 h-5" />
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -131,31 +315,25 @@ export default function CityPage() {
 
           {/* Right Column - City Info & Categories */}
           <div className="space-y-6">
-            <div className="bg-card rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">About {formattedCityName}</h3>
+            <div className="bg-card rounded-lg p-6 sticky top-10">
+              <h3 className="text-lg font-semibold mb-4">
+                About {formattedCityName}
+              </h3>
               <p className="text-muted-foreground mb-4">
-                Discover the best places, share your experiences, and connect with fellow travelers
-                in {formattedCityName}. From hidden gems to popular attractions, find everything
-                you need to know about this amazing city.
+                Discover the best places, share your experiences, and connect
+                with fellow travelers in {formattedCityName}. From hidden gems
+                to popular attractions, find everything you need to know about
+                this amazing city.
               </p>
-              <button className="w-full bg-primary text-primary-foreground rounded-lg py-2 hover:bg-primary/90 transition-colors">
-                Share Your Experience
-              </button>
-            </div>
 
-            <div className="bg-card rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Popular Categories</h3>
-              <div className="space-y-2">
-                {["Restaurants", "Parks", "Museums", "Nightlife", "Shopping"].map((category) => (
-                  <button
-                    key={category}
-                    className="w-full text-left px-4 py-2 rounded-lg hover:bg-accent transition-colors flex items-center justify-between"
-                  >
-                    <span>{category}</span>
-                    <Camera className="w-4 h-4 text-muted-foreground" />
-                  </button>
-                ))}
-              </div>
+                <Button
+                 className="w-full"
+                 onClick={() => router.push(`/upload`)}
+                 
+                 
+                 >
+                  Share Your Experience
+               </Button>
             </div>
           </div>
         </div>

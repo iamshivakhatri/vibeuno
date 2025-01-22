@@ -26,6 +26,21 @@ model Comment {
   visible     Boolean   @default(true)
 }
 
+model City {
+  id          String    @id @default(cuid())
+  name        String
+  state       String
+  country     String
+  description String?   // Optional
+  coverImage  String?   // Optional
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  places      Place[]   // One-to-many relation with Place
+
+  @@unique([name, state, country]) // Composite unique constraint
+}
+
+
 
 model Place {
   id          String    @id @default(cuid())
@@ -34,6 +49,8 @@ model Place {
   description String?
   state       String
   city        String
+  cityId      String?      // Foreign key for City
+  cityName    City?        @relation(fields: [cityId], references: [id]) // Link to City
   country     String?
   category    String?
   imageUrl    String?

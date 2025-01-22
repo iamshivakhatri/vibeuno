@@ -50,6 +50,121 @@ export async function addPlace(formData: {
 }
 
 
+// export async function populateCities() {
+//   try {
+//     // Step 1: Retrieve all places that do not have a cityId
+//     const placesWithoutCityId = await prisma.place.findMany({
+//       where: {
+//         cityId: null,  // Only fetch places where the cityId is not set
+//       },
+//     });
+
+//     // Step 2: Loop through each place and ensure the city exists in the City table
+//     for (const place of placesWithoutCityId) {
+//       // Check if the city exists based on city, state, and country
+//       const city = await prisma.city.upsert({
+//         where: {
+//           name_state_country: {
+//             name: place.city,
+//             state: place.state,
+//             country: place.country || "Unknown", // Default to "Unknown" if no country is provided
+//           },
+//         },
+//         create: {
+//           name: place.city,
+//           state: place.state,
+//           country: place.country || "Unknown", // Default to "Unknown" if no country is provided
+//           description: `Community for ${place.city}, ${place.state}`, // Optional: You can customize this
+//           coverImage: `https://source.unsplash.com/featured/?${place.city}`, // Optional: You can customize this
+//         },
+//         update: {}, // Do nothing if the city already exists
+//       });
+
+//       // Step 3: Update the Place record with the cityId of the newly created or found city
+//       await prisma.place.update({
+//         where: { id: place.id },
+//         data: { cityId: city.id }, // Set the cityId on the place record
+//       });
+
+//       console.log(`Place ${place.id} updated with city ${city.name} (${city.id})`);
+//     }
+
+//     console.log("Cities populated successfully for all places.");
+//   } catch (error) {
+//     console.error("Error populating cities:", error);
+//   } finally {
+//     await prisma.$disconnect();
+//   }
+// }
+
+export async function getCityData(name: string) {
+  console.log('Name at the start: ', name);
+
+  if (!name) {
+    console.error('No city name provided');
+    return []; 
+  }
+
+  try {
+    const cityData = await prisma.city.findMany({
+      where: {
+        name: {
+          contains: name,
+          mode: 'insensitive',
+        },
+      },
+      include: {
+        _count: {
+          select: { places: true },
+        },
+        places: {
+          select: {
+            id: true,
+            name: true,
+            caption: true,
+            description: true,
+            imageUrl: true,
+            image: true,
+            category: true,
+            numVotes: true,
+            comments: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profileUrl: true,
+                occupation: true,
+              },
+            },
+            createdAt: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Check if city data is empty
+    if (cityData.length === 0) {
+      console.log('No cities found with the name:', name);
+      return []; 
+    }
+
+    console.log('City data fetched successfully: ', JSON.stringify(cityData, null, 2)); // More readable log
+
+    return cityData;
+  } catch (error) {
+    console.error('Error fetching city data:', error);
+    return []; 
+  }
+}
+
+
+
+
+
+
 export async function getPlaces(state?: string) {
   return prisma.place.findMany({
     where: { state  },

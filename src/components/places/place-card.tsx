@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart } from 'lucide-react';
+import { Heart, FolderOpen } from 'lucide-react';
 import { useState } from 'react';
 import { voteForPlace } from '@/actions/place';
 import { useAuth } from '@/lib/auth';
@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hasUserVotedForPlace, getPlaceVoteCount } from '@/actions/user';
+import { Badge } from '../ui/badge';
 
 interface PlaceCardProps {
   place: {
@@ -21,6 +22,7 @@ interface PlaceCardProps {
     image?: string[];
     _count: { votes: number };
     city: string;
+    category?: string;
   };
   viewMode?: 'grid' | 'list';
 }
@@ -105,59 +107,105 @@ export function PlaceCard({ place, viewMode = 'grid' }: PlaceCardProps) {
     : "aspect-[4/3] relative";
 
   return (
-    <Card 
-      className={cardClassName}
-      onClick={() => router.push(`/places/${place.id}`)}
-      role="button"
-    >
-      <div className={`${imageClassName} relative`}>
-      <Image
-        src={place.imageUrl || `https://source.unsplash.com/featured/?${encodeURIComponent(place.name)},landmark`}
-        alt={place.name}
-        className="object-contain group-hover:scale-105 transition-transform duration-300"
-        fill
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      />
+    // <Card 
+    //   className={cardClassName}
+    //   onClick={() => router.push(`/places/${place.id}`)}
+    //   role="button"
+    // >
+    //   <div className={`${imageClassName} relative`}>
+    //   <Image
+    //     src={place.imageUrl || `https://source.unsplash.com/featured/?${encodeURIComponent(place.name)},landmark`}
+    //     alt={place.name}
+    //     className="object-contain group-hover:scale-105 transition-transform duration-300"
+    //     fill
+    //     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+    //   />
  
-     </div>
+    //  </div>
 
   
 
-      <div className={viewMode === 'list' ? 'flex-1' : ''}>
-        <CardContent className="p-4">
-          <h3 className="text-lg font-semibold mb-1">{place.name}</h3>
-          <p className="text-sm text-muted-foreground mb-2">{place.city}</p>
-          <p className="text-sm line-clamp-2">{place.description }</p>
-        </CardContent>
-        <CardFooter className="p-4 pt-0 flex justify-between">
-          <div>
-          <Button
-            variant={hasVoted ? "secondary" : "outline"}
-            size="sm"
-            onClick={handleVote}
-            disabled={voteMutation.isPending}
-            className="flex items-center gap-2"
-          >
-            <Heart 
-              className={`h-4 w-4 ${hasVoted ? 'fill-primary text-primary' : ''}`} 
-            />
-            <span>{voteCount}</span>
-          </Button>
-          </div>
-          <Button
-            variant={hasVoted ? "secondary" : "outline"}
-            size="sm"
-            onClick={handleVote}
-            disabled={voteMutation.isPending}
-            className="flex items-center gap-2"
-          >
-             <span> {place?.image ? `${place.image.length} photos` : 'No photos'}</span>
+    //   <div className={viewMode === 'list' ? 'flex-1' : ''}>
+    //     <CardContent className="p-4">
+    //       <h3 className="text-lg font-semibold mb-1">{place.name}</h3>
+    //       <p className="text-sm text-muted-foreground mb-2">{place.city}</p>
+    //       <p className="text-sm line-clamp-2">{place.description }</p>
+    //     </CardContent>
+    //     <CardFooter className="p-4 pt-0 flex justify-between">
+    //       <div>
+    //       <Button
+    //         variant={hasVoted ? "secondary" : "outline"}
+    //         size="sm"
+    //         onClick={handleVote}
+    //         disabled={voteMutation.isPending}
+    //         className="flex items-center gap-2"
+    //       >
+    //         <Heart 
+    //           className={`h-4 w-4 ${hasVoted ? 'fill-primary text-primary' : ''}`} 
+    //         />
+    //         <span>{voteCount}</span>
+    //       </Button>
+    //       </div>
+    //       <Button
+    //         variant={hasVoted ? "secondary" : "outline"}
+    //         size="sm"
+    //         onClick={handleVote}
+    //         disabled={voteMutation.isPending}
+    //         className="flex items-center gap-2"
+    //       >
+    //          <span> {place?.image ? `${place.image.length} photos` : 'No photos'}</span>
 
 
-          </Button>   
+    //       </Button>   
    
-        </CardFooter>
+    //     </CardFooter>
+    //   </div>
+    // </Card>
+    <div
+    key={place.id}
+    className="group relative aspect-square overflow-hidden rounded-lg bg-muted cursor-pointer"
+    onClick={() => router.push(`/places/${place.id}`)}
+  >
+    {/* Image */}
+    <div className="relative w-full h-full">
+      <Image
+        src={
+          place.imageUrl || 
+          `https://source.unsplash.com/featured/?${encodeURIComponent(place.name)},landmark`
+        }
+        alt={place.name}
+        className="object-cover transition-transform group-hover:scale-105 duration-300"
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  
+    {/* Bottom Right: Number of Photos & Album Indicator */}
+    <div className="absolute bottom-4 right-4 flex items-center gap-1 text-white bg-black/60 px-2 py-1 rounded-md text-sm shadow-md">
+      <span>{place?.image ? `${place.image.length} Photos` : 'No Photos'}</span>
+      <FolderOpen className="w-4 h-4 text-white/80" />
+    </div>
+  
+    {/* Hover Info */}
+    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="absolute bottom-0 p-4 text-white">
+        {/* Place Name */}
+        <h3 className="text-lg font-semibold">{place.name}</h3>
+  
+        {/* Additional Info */}
+        <p className="text-sm text-white/80">{place.city}</p>
+        <p className="text-sm line-clamp-2 mt-1">{place.description}</p>
+        <div className="flex gap-2 mt-2">
+
+          <Badge key={place.category? place.category : ""} variant="secondary" className="bg-white/20">
+            {place.category}
+          </Badge>
+
+        </div>
       </div>
-    </Card>
+    </div>
+  </div>
+  
+
   );
 }
