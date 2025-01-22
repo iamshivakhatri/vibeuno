@@ -98,11 +98,11 @@ export async function addPlace(formData: {
 // }
 
 export async function getCityData(name: string) {
-  console.log('Name at the start: ', name);
+  console.log("Name at the start: ", name);
 
   if (!name) {
-    console.error('No city name provided');
-    return []; 
+    console.error("No city name provided");
+    return [];
   }
 
   try {
@@ -110,7 +110,7 @@ export async function getCityData(name: string) {
       where: {
         name: {
           contains: name,
-          mode: 'insensitive',
+          mode: "insensitive",
         },
       },
       include: {
@@ -127,7 +127,23 @@ export async function getCityData(name: string) {
             image: true,
             category: true,
             numVotes: true,
-            comments: true,
+            createdAt: true,
+            comments: {
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                likes: true,
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    profileUrl: true,
+                    occupation: true,
+                  },
+                },
+              },
+            },
             user: {
               select: {
                 id: true,
@@ -136,27 +152,37 @@ export async function getCityData(name: string) {
                 occupation: true,
               },
             },
-            createdAt: true,
           },
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
-    // Check if city data is empty
     if (cityData.length === 0) {
-      console.log('No cities found with the name:', name);
-      return []; 
+      console.log("No cities found with the name:", name);
+      return [];
     }
 
-    console.log('City data fetched successfully: ', JSON.stringify(cityData, null, 2)); // More readable log
-
+    console.log("City data fetched successfully: ", JSON.stringify(cityData, null, 2));
     return cityData;
   } catch (error) {
-    console.error('Error fetching city data:', error);
-    return []; 
+    console.error("Error fetching city data:", error);
+    return [];
+  }
+}
+
+
+export async function deleteComment(commentId: string): Promise<void> {
+  try {
+    await prisma.comment.delete({
+      where: { id: commentId },
+    });
+    console.log(`Comment with ID ${commentId} deleted successfully.`);
+  } catch (error) {
+    console.error(`Error deleting comment with ID ${commentId}:`, error);
+    throw new Error("Failed to delete comment.");
   }
 }
 
@@ -838,5 +864,37 @@ export async function getPost() {
   } catch (error) {
     console.error("Error fetching places:", error);
     return [];
+  }
+}
+
+
+type CreateCommentInput = {
+  content: string;
+  userId: string; // The ID of the user creating the comment
+  placeId: string; // The ID of the Place (post) to which the comment belongs
+  parentId?: string; // Optional: For replies to another comment
+};
+
+export async function createComment(data: CreateCommentInput) {
+  try {
+    const { content, userId, placeId, parentId } = data;
+
+    if (!content || !userId || !placeId) {
+      throw new Error("Content, userId, and placeId are required");
+    }
+
+    const newComment = await prisma.comment.create({
+      data: {
+        content,
+        userId,
+        placeId,
+        parentId, // Can be undefined if it's not a reply
+      },
+    });
+
+    return newComment;
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    throw new Error("Failed to create comment");
   }
 }

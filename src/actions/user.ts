@@ -132,7 +132,6 @@ export const onAuthenticatedUser = async () => {
       return { status: 200, user: newUser };
     }
 
-    console.log('user created:', newUser);
 
     // In case user creation fails, return a 500 error
     return { status: 500, message: 'Failed to create user' };
@@ -321,7 +320,7 @@ export async function getProfileUrl(userId: string) {
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
-    return user?.profileUrl;
+    return { profileUrl: user?.profileUrl };
 
   }catch(error){
     console.error('Error fetching profile url:', error);
@@ -330,13 +329,41 @@ export async function getProfileUrl(userId: string) {
  
 }
 
+export async function getProfileFromClerk(userId: string) {
+  console.log("this is the userId at getprofilefromclerk", userId)
+  try {
+    const user = await prisma.user.findUnique({
+      where: { clerkId: userId },
+      select: {
+        profileUrl: true,
+        id: true,
+      },
+    });
+
+    console.log("this is the user at getprofilefromclerk", user)
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return { profileUrl: user.profileUrl, userId: user.id };
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    throw new Error('Unable to fetch profile');
+  }
+}
+
+
 
 export async function hasUserVotedForPlace(placeId: string, userId: string) {
-  try {
 
+  console.log("this is the placeId", placeId)
+  console.log("this is the userId", userId)
+  // here userId is the clerkId
+  try {
     const user = await prisma.user.findUnique({
       where:{
-        clerkId: userId
+        id: userId
       }
     })
 
@@ -355,6 +382,10 @@ export async function hasUserVotedForPlace(placeId: string, userId: string) {
       where: { id: placeId },
       select: { votedUsers: { where: { id: user?.id } } },
     });
+
+    console.log("this is the hasVoted", hasVoted)
+
+     // Check if the user has voted for the place
 
 
     if (hasVoted?.votedUsers === null || hasVoted?.votedUsers === undefined || hasVoted?.votedUsers.length === 0) {

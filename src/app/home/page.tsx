@@ -3,7 +3,7 @@
 
 
 import { getPost,  getPlaces } from '@/actions/place';
-import { PostCard } from '@/components/home/post-card';
+// import { PostCard } from '@/components/home/post-card';
 import { CityCard } from '@/components/home/city-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,9 +35,9 @@ export  default async function Home() {
                 </Button>
               </div> */}
               <div className="space-y-6">
-                 {posts?.map((post) => (
+                 {/* {posts?.map((post) => (
                   <PostCard key={post.id} post={post} />
-                ))}
+                ))} */}
               </div>
             </section>
           </div>
