@@ -15,6 +15,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import PostCard from "@/components/post/PostCard";
 import { getProfileFromClerk } from "@/actions/user";
+import { useQueryData } from "@/hooks/useQueryData";
 
 
 // Types based on your schema
@@ -32,6 +33,8 @@ type Place = {
   createdAt: string;
 };
 
+
+
 type User = {
   id: string;
   name?: string;
@@ -47,6 +50,19 @@ type Comment = {
   likes?: number;
 };
 
+type placesDataProps = {
+  id: string; // Unique identifier for the country
+  name: string; // Name of the country or city (e.g., "dallas")
+  description: string; // Brief description (e.g., "Community for dallas, Texas")
+  state: string; // The state (e.g., "Texas")
+  coverImage: string; // URL of the cover image
+  createdAt: Date; // Date when the country object was created
+  updatedAt: Date; // Date when the country object was last updated
+  places: Place[]; // Array of places associated with this country
+  _count: {
+    places: number; // Count of places
+  };
+};
 const CATEGORIES = [
   "All",
   "Restaurants",
@@ -74,47 +90,42 @@ export default function CityPage() {
   
   
 
-  const { data } = useQuery({
-    queryKey: ["cityData", cityName],
-    queryFn: () => getCityData(formattedCityName),
-  });
 
-  const mockPlaces = 
-  data?.[0]?.places.map((place: any) => ({
-    ...place,
-    comments: place.comments.map((comment: any) => ({
-      id: comment.id,
-      content: comment.content,
-      createdAt: comment.createdAt,
-      likes: comment.likes,
-      user: {
-        id: comment.user.id,
-        name: comment.user.name,
-        profileUrl: comment.user.profileUrl,
-        occupation: comment.user.occupation,
-      },
-    })),
-    user: {
-      id: place.user.id,
-      name: place.user.name,
-      profileUrl: place.user.profileUrl,
-      occupation: place.user.occupation,
-    },
-  })) || [];
+  const { data } = useQueryData(
+    ['placesFromCity'],
+    () => getCityData(formattedCityName)
+);
+
+if (!data) {
+    console.log("No data available.");
+    return;
+}
+
+const placesData = data as placesDataProps[]; // Type assertion, if you know the shape.
 
 
-    
+if (!placesData[0].places) {
+  console.error("Places data is missing or invalid");
+  return;
+}
+if (!placesData || !Array.isArray(placesData) || placesData.length === 0) {
+  console.error("placesData is missing or invalid");
+  return <div>Error: Unable to load places data</div>;
+}
 
-  const cityStats = {
-    members: 12453,
-    places: mockPlaces?.length,
-    trending: "+24%",
-  };
+// Safely access places and _count
+const places = placesData[0]?.places || [];
+const cityStats = {
+  members: 12453,
+  places: placesData[0]?._count?.places || 0, // Fallback to 0 if _count or places is missing
+  trending: "+24%",
+};
 
-  const filteredPlaces =
-    selectedCategory === "All"
-      ? mockPlaces
-      : mockPlaces?.filter((place) => place.category === selectedCategory);
+// Filter places based on selectedCategory
+const filteredPlaces =
+  selectedCategory === "All"
+    ? places
+    : places.filter((place) => place.category === selectedCategory);
 
 
 
@@ -179,7 +190,7 @@ export default function CityPage() {
             <div className="grid gap-6">
               {filteredPlaces?.map((place) => (
                 profileData?.profileUrl && profileData?.userId && (
-                  <PostCard place={place} profileUrl={profileData.profileUrl} clerkId={user?.id} userId ={profileData.userId}/>
+                  <PostCard key={place.id} place={place} profileUrl={profileData.profileUrl} clerkId={user?.id} userId ={profileData.userId}/>
                 )
                 // <div
                 //   key={place.id}

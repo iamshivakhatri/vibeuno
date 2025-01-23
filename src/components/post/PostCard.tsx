@@ -63,42 +63,14 @@ type PostCardProps = {
 };
 
 const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
-  console.log("this is the place", place);
+  console.log("this is the place at the postcard", place);
+  console.log("this is the profileurl", profileUrl);
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
 
-//   const { mutate:addComment } = useMutation({
-//     mutationFn: async (newComment: {
-//       content: string;
-//       userId: string;
-//       placeId: string;
-//     }) => {
-//       return createComment(newComment);
-//     },
-//     onSuccess: (data) => {
-//       console.log("Comment created successfully:", data);
-//       setNewComment("");
-//     },
-//     onError: (error) => {
-//       console.error("Error creating comment:", error);
-//     },
-//   });
-
-//   const {mutate: mutateDelete} =  useMutation({
-//     mutationFn: (commentId: string) => deleteComment(commentId),
-//     onSuccess: () => {
-//       console.log("Comment deleted successfully.");
-//       // Optionally refetch or update the local cache
-//     },
-//     onError: (error: any) => {
-//       console.error("Failed to delete comment:", error.message);
-//       alert("Failed to delete comment. Please try again.");
-//     },
-//   });
-
-const { mutate: addComment } = useMutation({
+  const { mutate:addComment } = useMutation({
     mutationFn: async (newComment: {
       content: string;
       userId: string;
@@ -106,86 +78,115 @@ const { mutate: addComment } = useMutation({
     }) => {
       return createComment(newComment);
     },
-    onMutate: async (newComment) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['comments', newComment.placeId] });
-      
-      // Snapshot previous comments
-      const previousComments = queryClient.getQueryData(['comments', newComment.placeId]);
-      
-      // Create optimistic comment
-      const optimisticComment = {
-        id: `temp-${Date.now()}`,
-        ...newComment,
-        createdAt: new Date().toISOString(),
-      };
-      
-      // Add optimistic comment to cache
-      queryClient.setQueryData(['comments', newComment.placeId], (old: any[] = []) => 
-        [...old, optimisticComment]
-      );
-      
-      return { previousComments };
-    },
-    onError: (error, newComment, context: any) => {
-      // Rollback on error
-      queryClient.setQueryData(
-        ['comments', newComment.placeId],
-        context?.previousComments
-      );
-      console.error("Error creating comment:", error);
-    },
     onSuccess: (data) => {
       console.log("Comment created successfully:", data);
       setNewComment("");
     },
-    onSettled: (data, error, variables) => {
-      // Refetch to ensure cache is in sync
-      queryClient.invalidateQueries({ queryKey: ['comments', variables.placeId] });
+    onError: (error) => {
+      console.error("Error creating comment:", error);
     },
   });
 
-  const { mutate: mutateDelete } = useMutation({
+  const {mutate: mutateDelete} =  useMutation({
     mutationFn: (commentId: string) => deleteComment(commentId),
-    onMutate: async (commentId) => {
-      // You'll need to have access to placeId here
-      // Either pass it as part of the mutation variables or access it from props/context
-      const placeId = place.id; // You need to have access to this
-
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['comments', placeId] });
-      
-      // Snapshot previous comments
-      const previousComments = queryClient.getQueryData(['comments', placeId]);
-      
-      // Remove comment optimistically
-      queryClient.setQueryData(['comments', placeId], (old: any[] = []) =>
-        old.filter(comment => comment.id !== commentId)
-      );
-      
-      return { previousComments, placeId };
+    onSuccess: () => {
+      console.log("Comment deleted successfully.");
+      // Optionally refetch or update the local cache
     },
-    onError: (error: any, commentId, context: any) => {
-      // Rollback on error
-      if (context?.placeId) {
-        queryClient.setQueryData(
-          ['comments', context.placeId],
-          context.previousComments
-        );
-      }
+    onError: (error: any) => {
       console.error("Failed to delete comment:", error.message);
       alert("Failed to delete comment. Please try again.");
     },
-    onSuccess: () => {
-      console.log("Comment deleted successfully.");
-    },
-    onSettled: (data, error, variables, context: any) => {
-      // Refetch to ensure cache is in sync
-      if (context?.placeId) {
-        queryClient.invalidateQueries({ queryKey: ['comments', context.placeId] });
-      }
-    },
   });
+
+//   const { mutate: addComment } = useMutation({
+//     mutationFn: async (newComment: {
+//       content: string;
+//       userId: string;
+//       placeId: string;
+//     }) => {
+//       return createComment(newComment);
+//     },
+//     onMutate: async (newComment) => {
+//       // Cancel outgoing refetches
+//       await queryClient.cancelQueries({ queryKey: ['comments', newComment.placeId] });
+      
+//       // Snapshot previous comments
+//       const previousComments = queryClient.getQueryData(['comments', newComment.placeId]);
+      
+//       // Create optimistic comment
+//       const optimisticComment = {
+//         id: `temp-${Date.now()}`,
+//         ...newComment,
+//         createdAt: new Date().toISOString(),
+//       };
+      
+//       // Add optimistic comment to cache
+//       queryClient.setQueryData(['comments', newComment.placeId], (old: any[] = []) => 
+//         [...old, optimisticComment]
+//       );
+      
+//       return { previousComments };
+//     },
+//     onError: (error, newComment, context: any) => {
+//       // Rollback on error
+//       queryClient.setQueryData(
+//         ['comments', newComment.placeId],
+//         context?.previousComments
+//       );
+//       console.error("Error creating comment:", error);
+//     },
+//     onSuccess: (data) => {
+//       console.log("Comment created successfully:", data);
+//       setNewComment("");
+//     },
+//     onSettled: (data, error, variables) => {
+//       // Refetch to ensure cache is in sync
+//       queryClient.invalidateQueries({ queryKey: ['comments', variables.placeId] });
+//     },
+//   });
+
+//   const { mutate: mutateDelete } = useMutation({
+//     mutationFn: (commentId: string) => deleteComment(commentId),
+//     onMutate: async (commentId) => {
+//       // You'll need to have access to placeId here
+//       // Either pass it as part of the mutation variables or access it from props/context
+//       const placeId = place.id; // You need to have access to this
+
+//       // Cancel outgoing refetches
+//       await queryClient.cancelQueries({ queryKey: ['comments', placeId] });
+      
+//       // Snapshot previous comments
+//       const previousComments = queryClient.getQueryData(['comments', placeId]);
+      
+//       // Remove comment optimistically
+//       queryClient.setQueryData(['comments', placeId], (old: any[] = []) =>
+//         old.filter(comment => comment.id !== commentId)
+//       );
+      
+//       return { previousComments, placeId };
+//     },
+//     onError: (error: any, commentId, context: any) => {
+//       // Rollback on error
+//       if (context?.placeId) {
+//         queryClient.setQueryData(
+//           ['comments', context.placeId],
+//           context.previousComments
+//         );
+//       }
+//       console.error("Failed to delete comment:", error.message);
+//       alert("Failed to delete comment. Please try again.");
+//     },
+//     onSuccess: () => {
+//       console.log("Comment deleted successfully.");
+//     },
+//     onSettled: (data, error, variables, context: any) => {
+//       // Refetch to ensure cache is in sync
+//       if (context?.placeId) {
+//         queryClient.invalidateQueries({ queryKey: ['comments', context.placeId] });
+//       }
+//     },
+//   });
 
 
 
@@ -218,7 +219,7 @@ const { mutate: addComment } = useMutation({
         <Avatar className="h-10 w-10">
           <Image
             src={place.user.profileUrl || "https://github.com/shadcn.png"}
-            alt={place.user.name || "User"}
+            alt={  "User"}
             width={40}
             height={40}
           />
