@@ -14,7 +14,7 @@ export const useMutationData = (
         onSuccess: (data) => {
             if (onSuccess) onSuccess()
             return toast(
-                data?.status === 200 || data?.status === 201 ? 'Success' : 'Error',
+                'Success',
                 {
                     description: data?.message,
                 }
@@ -25,6 +25,14 @@ export const useMutationData = (
                 queryKey: queryKey ? [queryKey] : undefined,
                 exact: true,
             })
+        },
+        onError: (error) => {
+            return toast(
+                'Error',
+                {
+                    description: error?.message,
+                }
+            )
         },
     })
     return {mutate, isPending}

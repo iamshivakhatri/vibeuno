@@ -22,6 +22,9 @@ import { Badge } from "@/components/ui/badge";
 import { createComment } from "@/actions/place";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteComment } from "@/actions/place";
+import { useMutationData, useMutationDataState } from "@/hooks/useMutationData";
+import { voteForPlace } from "@/actions/place";
+import { toast } from "sonner"
 
 type Place = {
   id: string;
@@ -63,151 +66,108 @@ type PostCardProps = {
 };
 
 const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
-  console.log("this is the place at the postcard", place);
-  console.log("this is the profileurl", profileUrl);
+
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
 
-  const { mutate:addComment } = useMutation({
-    mutationFn: async (newComment: {
-      content: string;
-      userId: string;
-      placeId: string;
-    }) => {
-      return createComment(newComment);
-    },
-    onSuccess: (data) => {
-      console.log("Comment created successfully:", data);
-      setNewComment("");
-    },
-    onError: (error) => {
-      console.error("Error creating comment:", error);
-    },
-  });
+  const {mutate:addComment , isPending: isAddingCommentPending} = useMutationData(
+    ['add-comment'],
+    (newComment: {
+        content: string;
+        userId: string;
+        placeId: string;
+      })=>( createComment(newComment)),
+    'placesFromCity',
+    ()=>setNewComment("")
+    
+  )
 
-  const {mutate: mutateDelete} =  useMutation({
-    mutationFn: (commentId: string) => deleteComment(commentId),
-    onSuccess: () => {
-      console.log("Comment deleted successfully.");
-      // Optionally refetch or update the local cache
-    },
-    onError: (error: any) => {
-      console.error("Failed to delete comment:", error.message);
-      alert("Failed to delete comment. Please try again.");
-    },
-  });
+//   const {latestVariables} = useMutationDataState(['handle-vote']) // for optimistic ui
 
-//   const { mutate: addComment } = useMutation({
-//     mutationFn: async (newComment: {
-//       content: string;
-//       userId: string;
-//       placeId: string;
-//     }) => {
-//       return createComment(newComment);
-//     },
-//     onMutate: async (newComment) => {
-//       // Cancel outgoing refetches
-//       await queryClient.cancelQueries({ queryKey: ['comments', newComment.placeId] });
-      
-//       // Snapshot previous comments
-//       const previousComments = queryClient.getQueryData(['comments', newComment.placeId]);
-      
-//       // Create optimistic comment
-//       const optimisticComment = {
-//         id: `temp-${Date.now()}`,
-//         ...newComment,
-//         createdAt: new Date().toISOString(),
-//       };
-      
-//       // Add optimistic comment to cache
-//       queryClient.setQueryData(['comments', newComment.placeId], (old: any[] = []) => 
-//         [...old, optimisticComment]
-//       );
-      
-//       return { previousComments };
-//     },
-//     onError: (error, newComment, context: any) => {
-//       // Rollback on error
-//       queryClient.setQueryData(
-//         ['comments', newComment.placeId],
-//         context?.previousComments
-//       );
-//       console.error("Error creating comment:", error);
-//     },
-//     onSuccess: (data) => {
-//       console.log("Comment created successfully:", data);
-//       setNewComment("");
-//     },
-//     onSettled: (data, error, variables) => {
-//       // Refetch to ensure cache is in sync
-//       queryClient.invalidateQueries({ queryKey: ['comments', variables.placeId] });
-//     },
-//   });
-
-//   const { mutate: mutateDelete } = useMutation({
-//     mutationFn: (commentId: string) => deleteComment(commentId),
-//     onMutate: async (commentId) => {
-//       // You'll need to have access to placeId here
-//       // Either pass it as part of the mutation variables or access it from props/context
-//       const placeId = place.id; // You need to have access to this
-
-//       // Cancel outgoing refetches
-//       await queryClient.cancelQueries({ queryKey: ['comments', placeId] });
-      
-//       // Snapshot previous comments
-//       const previousComments = queryClient.getQueryData(['comments', placeId]);
-      
-//       // Remove comment optimistically
-//       queryClient.setQueryData(['comments', placeId], (old: any[] = []) =>
-//         old.filter(comment => comment.id !== commentId)
-//       );
-      
-//       return { previousComments, placeId };
-//     },
-//     onError: (error: any, commentId, context: any) => {
-//       // Rollback on error
-//       if (context?.placeId) {
-//         queryClient.setQueryData(
-//           ['comments', context.placeId],
-//           context.previousComments
-//         );
-//       }
-//       console.error("Failed to delete comment:", error.message);
-//       alert("Failed to delete comment. Please try again.");
-//     },
-//     onSuccess: () => {
-//       console.log("Comment deleted successfully.");
-//     },
-//     onSettled: (data, error, variables, context: any) => {
-//       // Refetch to ensure cache is in sync
-//       if (context?.placeId) {
-//         queryClient.invalidateQueries({ queryKey: ['comments', context.placeId] });
-//       }
-//     },
-//   });
+const {mutate:mutateDelete , isPending: isDeletingCommentPending} = useMutationData(
+    ['delete-comment'],
+    (commentId: string) => deleteComment(commentId),
+    'placesFromCity',    
+  )
 
 
-
-
-  // Query to check if user has voted
-  const { data: hasVoted } = useQuery({
-    queryKey: ["hasVoted", place.id, userId],
-    queryFn: () => hasUserVotedForPlace(place.id, userId || ""),
-  });
-
-  const handleComment = (placeId: string) => {
+const handleComment = (placeId: string) => {
     if (!newComment.trim()) return;
     const content = newComment.trim();
-    console.log("this is the comment", content);
     addComment({
       content,
       userId,
       placeId,
     });
-    console.log("Adding comment to place:", placeId, newComment);
   };
+
+
+
+  // Query to check if user has voted
+  const { data: hasVoted } = useQuery({
+    queryKey: ["hasVoted", place.id],
+    queryFn: () => hasUserVotedForPlace(place.id, userId || ""),
+  });
+
+
+  const { data: voteCount = place.numVotes } = useQuery({
+    queryKey: ['vote-count', place.id],
+    queryFn: () => getPlaceVoteCount(place.id),
+  });
+
+
+const { mutate: addOrRemoveVote } = useMutation(
+    {
+      mutationKey: ["handle-vote"],
+      mutationFn: ({ placeId, userId }: { placeId: string; userId: string; }) =>
+        voteForPlace(placeId, userId),
+      onMutate: async ({ placeId, userId }) => {
+        // Capture the current state before mutation occurs
+        const previousHasVoted = queryClient.getQueryData(["hasVoted", placeId]);
+        const previousVoteCount = queryClient.getQueryData(["vote-count", placeId]);
+  
+        // Optimistically update the state
+        queryClient.setQueryData(["hasVoted", placeId], !hasVoted); // Toggle vote state
+        queryClient.setQueryData(["vote-count", placeId], (prev: number) => (hasVoted ? prev - 1 : prev + 1));
+
+         // Conditionally show a toast based on whether adding or removing a vote
+      if (hasVoted) {
+        toast('Your vote has been removed!');
+      } else {
+        toast.success('Your vote has been added!');
+      }
+
+
+  
+        // Return the context to potentially roll back in case of an error
+        return { previousHasVoted, previousVoteCount };
+      },
+      onError: (error, variables, context) => {
+        // Rollback the optimistic update if the mutation fails
+        queryClient.setQueryData(["hasVoted", place.id], context?.previousHasVoted);
+        queryClient.setQueryData(["vote-count", place.id], context?.previousVoteCount);
+      },
+      onSettled: () => {
+        // Invalidate queries to refetch the data from the server after mutation settles
+        queryClient.invalidateQueries({ queryKey: ["hasVoted", place.id] });
+        queryClient.invalidateQueries({ queryKey: ["vote-count", place.id] });
+      },
+    }
+  );
+  
+  
+  const handleVote = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (clerkId) {
+        addOrRemoveVote({ placeId: place.id, userId: clerkId}); // Pass an object to the mutation
+
+    } else {
+      console.error("clerkId is undefined");
+    }
+  };
+  
 
   return (
     <div
@@ -250,13 +210,13 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
 
         {/* Interactions */}
         <div className="flex items-center gap-4 text-muted-foreground mb-4">
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button variant="ghost" size="sm" className="gap-2" onClick={handleVote}>
             <Heart
               className={`h-4 w-4 ${
                 hasVoted ? "fill-primary text-primary" : ""
               }`}
             />
-            <span>{place.numVotes}</span>
+            <span>{voteCount}</span>
           </Button>
           <Button variant="ghost" size="sm" className="gap-2">
             <MessageSquare className="w-4 h-4" />
@@ -288,6 +248,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
                       <p className="font-semibold text-sm">
                         {comment.user.name}
                       </p>
+                      
                       <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => mutateDelete(comment.id)}

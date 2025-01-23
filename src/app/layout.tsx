@@ -4,7 +4,10 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from "@/components/theme";
 
 import { Navbar } from '@/components/navbar';
-import { Toaster } from '@/components/ui/toaster';
+// import { Toaster } from '@/components/ui/toaster';
+
+import { Toaster } from "sonner";
+
 
 import { ClerkProvider } from "@clerk/nextjs";
 

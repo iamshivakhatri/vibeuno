@@ -76,8 +76,11 @@ const CATEGORIES = [
 
 export default function CityPage() {
   const { user } = useUser();
-  const { cityName } = useParams();
+  const { cityName  } = useParams();
   const formattedCityName = cityName as string;
+  const newCityName = formattedCityName
+    .replace('-', ' ') // Replace the hyphen with a space
+    .replace(/^./, (str) => str.toUpperCase()); // Capitalize the first character
   const [selectedCategory, setSelectedCategory] = useState("All");
   const router = useRouter();
 
@@ -145,7 +148,7 @@ const filteredPlaces =
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
         <div className="absolute bottom-8 left-8 right-8">
           <h1 className="text-4xl font-bold text-black mb-2">
-            {formattedCityName}
+            {newCityName}
           </h1>
           <div className="flex gap-4 text-black/90">
             {/* <div className="flex items-center gap-2">

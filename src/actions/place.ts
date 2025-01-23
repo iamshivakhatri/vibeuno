@@ -449,8 +449,12 @@ export async function updateDescription(placeId: string, description: string) {
 
 
 
-export async function voteForPlace(placeId: string, userId: string) {
+export async function voteForPlace(placeId: string, userId: string, hasVoted?: boolean) {
+
+  // here userId is clerkId
   try {
+
+    console.log('Voting for place:', { placeId, userId });
 
     // Check if the user exists
     const user = await prisma.user.findUnique({
