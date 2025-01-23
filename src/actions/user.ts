@@ -320,7 +320,7 @@ export async function getProfileUrl(userId: string) {
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
-    return { profileUrl: user?.profileUrl };
+    return user?.profileUrl;
 
   }catch(error){
     console.error('Error fetching profile url:', error);
