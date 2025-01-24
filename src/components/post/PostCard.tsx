@@ -26,6 +26,8 @@ import { useMutationData, useMutationDataState } from "@/hooks/useMutationData";
 import { voteForPlace, toggleCommentLike } from "@/actions/place";
 import { toast } from "sonner"
 import { CommentSection } from "./CommentSection"
+import { ImageCarousel } from "./ImageCarousel"
+
 
 type Place = {
   id: string;
@@ -206,75 +208,129 @@ const { mutate: addOrRemoveVote } = useMutation(
   
 
   return (
-    <div
-      key={place.id}
-      className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-    >
-      {/* User Info */}
-      <div className="p-4 flex items-center gap-3 border-b">
-        <Avatar className="h-10 w-10">
-          <Image
-            src={place.user.profileUrl || "https://github.com/shadcn.png"}
-            alt={  "User"}
-            width={40}
-            height={40}
-          />
-        </Avatar>
-        <div>
-          <p className="font-semibold">{place.user.name}</p>
-          <p className="text-sm text-muted-foreground">
-            {place.user.occupation}
-          </p>
-        </div>
-      </div>
+    // <div
+    //   key={place.id}
+    //   className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+    // >
+    //   {/* User Info */}
+    //   <div className="p-4 flex items-center gap-3 border-b">
+    //     <Avatar className="h-10 w-10">
+    //       <Image
+    //         src={place.user.profileUrl || "https://github.com/shadcn.png"}
+    //         alt={  "User"}
+    //         width={40}
+    //         height={40}
+    //       />
+    //     </Avatar>
+    //     <div>
+    //       <p className="font-semibold">{place.user.name}</p>
+    //       <p className="text-sm text-muted-foreground">
+    //         {place.user.occupation}
+    //       </p>
+    //     </div>
+    //   </div>
 
-      {/* Image */}
-      <div className="relative h-[400px]">
-        <Image
-          src={place?.image?.[0] || ""}
-          alt={place?.name || "Place"}
-          fill
-          className="object-cover"
-        />
-        <Badge className="absolute top-4 right-4">{place.category}</Badge>
-      </div>
+    //   {/* Image */}
+    //   <div className="relative h-[400px]">
+    //     <Image
+    //       src={place?.image?.[0] || ""}
+    //       alt={place?.name || "Place"}
+    //       fill
+    //       className="object-cover"
+    //     />
+    //     <Badge className="absolute top-4 right-4">{place.category}</Badge>
+    //   </div>
 
-      {/* Content */}
-      <div className="p-4">
-        <h3 className="text-xl font-semibold mb-2">{place.name}</h3>
-        <p className="text-muted-foreground mb-4">{place.description}</p>
+    //   {/* Content */}
+    //   <div className="p-4">
+    //     <h3 className="text-xl font-semibold mb-2">{place.name}</h3>
+    //     <p className="text-muted-foreground mb-4">{place.description}</p>
 
-        {/* Interactions */}
-        <div className="flex items-center gap-4 text-muted-foreground mb-4">
-          <Button variant="ghost" size="sm" className="gap-2" onClick={handleVote}>
-            <Heart
-              className={`h-4 w-4 ${
-                hasVoted ? "fill-primary text-primary" : ""
-              }`}
-            />
-            <span>{voteCount}</span>
-          </Button>
-          <Button variant="ghost" size="sm" className="gap-2">
-            <MessageSquare className="w-4 h-4" />
-            <span>{place.comments.length}</span>
-          </Button>
-          <Button variant="ghost" size="sm" className="ml-auto">
-            <Bookmark className="w-4 h-4" />
-          </Button>
-        </div>
+    //     {/* Interactions */}
+    //     <div className="flex items-center gap-4 text-muted-foreground mb-4">
+    //       <Button variant="ghost" size="sm" className="gap-2" onClick={handleVote}>
+    //         <Heart
+    //           className={`h-4 w-4 ${
+    //             hasVoted ? "fill-primary text-primary" : ""
+    //           }`}
+    //         />
+    //         <span>{voteCount}</span>
+    //       </Button>
+    //       <Button variant="ghost" size="sm" className="gap-2">
+    //         <MessageSquare className="w-4 h-4" />
+    //         <span>{place.comments.length}</span>
+    //       </Button>
+    //       <Button variant="ghost" size="sm" className="ml-auto">
+    //         <Bookmark className="w-4 h-4" />
+    //       </Button>
+    //     </div>
             
-            <CommentSection
-                place={{ id: place.id, comments: place.comments }}
-                profileUrl={profileUrl}
-                handleComment={handleComment}
-                mutateDelete={mutateDelete}
-                handleLike={handleLike}
-            />
+    //         <CommentSection
+    //             place={{ id: place.id, comments: place.comments }}
+    //             profileUrl={profileUrl}
+    //             handleComment={handleComment}
+    //             mutateDelete={mutateDelete}
+    //             handleLike={handleLike}
+    //         />
 
 
 
+    //   </div>
+    // </div>
+    <div key={place.id} className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+    {/* User Info */}
+    <div className="p-4 flex items-center gap-3 border-b">
+      <Avatar className="h-10 w-10">
+        <Image
+          src={place.user.profileUrl || "https://github.com/shadcn.png"}
+          alt={place.user.name}
+          width={40}
+          height={40}
+        />
+      </Avatar>
+      <div>
+        <p className="font-semibold">{place.user.name}</p>
+        <p className="text-sm text-muted-foreground">{place.user.occupation}</p>
       </div>
     </div>
+
+    {/* Image Carousel */}
+    <ImageCarousel images={place.image || []} category={place.category || ""} />
+
+    {/* Content */}
+    <div className="p-4">
+      <h3 className="text-xl font-semibold mb-2">{place.name}</h3>
+      <p className="text-muted-foreground mb-4">{place.description}</p>
+
+      {/* Interactions */}
+      <div className="flex items-center gap-4 text-muted-foreground mb-4">
+        <Button variant="ghost" size="sm" className="gap-2" onClick={handleVote}>
+          <Heart className={`h-4 w-4 ${hasVoted ? "fill-primary text-primary" : ""}`} />
+          <span>{voteCount}</span>
+        </Button>
+        <Button variant="ghost" size="sm" className="gap-2">
+          <MessageSquare className="w-4 h-4" />
+          <span>{place.comments.length}</span>
+        </Button>
+        <Button variant="ghost" size="sm" className="ml-auto">
+          <Bookmark className="w-4 h-4" />
+        </Button>
+      </div>
+
+      <CommentSection
+        place={{ id: place.id, comments: place.comments }}
+        profileUrl={profileUrl}
+        handleComment={handleComment}
+        mutateDelete={mutateDelete}
+        handleLike={handleLike}
+      />
+    </div>
+  </div>
+
+     
+     
+
+      
   );
 };
 

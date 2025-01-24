@@ -33,6 +33,12 @@ export default function RootLayout({
   return (
     <ClerkProvider>
     <html lang="en" suppressHydrationWarning>
+      <head>
+      <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/swiper@8.5.0/swiper-bundle.min.css"
+        />
+      </head>
       <body className={`${inter.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light">
             <div className="flex min-h-screen flex-col">
