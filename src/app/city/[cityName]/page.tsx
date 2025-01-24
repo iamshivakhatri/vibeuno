@@ -37,17 +37,28 @@ type Place = {
 
 type User = {
   id: string;
-  name?: string;
-  profileUrl?: string;
+  name: string;
+  profileUrl?: string | undefined
   occupation?: string;
 };
 
 type Comment = {
-  id: string;
-  content: string;
-  user: User;
-  createdAt: string;
-  likes?: number;
+  id: string
+  content: string
+  user: {
+    id: string
+    name: string
+    profileUrl: string
+  }
+  userId: string
+  placeId: string
+  createdAt: string
+  editedAt?: string
+  isEdited: boolean
+  likes?: number
+  reported: boolean
+  parentId?: string
+  visible: boolean
 };
 
 type placesDataProps = {

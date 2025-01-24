@@ -134,6 +134,7 @@ export async function getCityData(name: string) {
                 content: true,
                 createdAt: true,
                 likes: true,
+                parentId: true,
                 user: {
                   select: {
                     id: true,
@@ -900,5 +901,49 @@ export async function createComment(data: CreateCommentInput) {
   } catch (error) {
     console.error("Error creating comment:", error);
     throw new Error("Failed to create comment");
+  }
+}
+
+
+
+interface LikeCommentInput {
+  userId: string;
+  commentId: string;
+}
+
+export async function toggleCommentLike({ userId, commentId }: LikeCommentInput) {
+  try {
+    console.log("Toggling like for comment:", { userId, commentId });
+    // Check if the user has already liked the comment
+    const existingLike = await prisma.like.findFirst({
+      where: {
+        userId: userId,
+        commentId: commentId,
+      },
+    });
+
+    if (existingLike) {
+      // User has already liked the comment, so remove the like
+      await prisma.like.delete({
+        where: {
+          id: existingLike.id,
+        },
+      });
+
+      return { message: "Like removed successfully", action: "unlike" };
+    } else {
+      // User hasn't liked the comment, so add a like
+      await prisma.like.create({
+        data: {
+          userId: userId,
+          commentId: commentId,
+        },
+      });
+
+      return { message: "Like added successfully", action: "like" };
+    }
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    throw new Error("Unable to toggle like. Please try again later.");
   }
 }

@@ -23,8 +23,9 @@ import { createComment } from "@/actions/place";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteComment } from "@/actions/place";
 import { useMutationData, useMutationDataState } from "@/hooks/useMutationData";
-import { voteForPlace } from "@/actions/place";
+import { voteForPlace, toggleCommentLike } from "@/actions/place";
 import { toast } from "sonner"
+import { CommentSection } from "./CommentSection"
 
 type Place = {
   id: string;
@@ -42,17 +43,28 @@ type Place = {
 
 type User = {
   id: string;
-  name?: string;
+  name: string;
   profileUrl?: string;
   occupation?: string;
 };
 
 type Comment = {
-  id: string;
-  content: string;
-  user: User;
-  createdAt: string;
-  likes?: number;
+    id: string
+    content: string
+    user: {
+      id: string
+      name: string
+      profileUrl: string
+    }
+    userId: string
+    placeId: string
+    createdAt: string
+    editedAt?: string
+    isEdited: boolean
+    likes?: number
+    reported: boolean
+    parentId?: string
+    visible: boolean
 };
 
 type PostCardProps = {
@@ -72,16 +84,27 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
 
+
+  const { mutate: handleLike } = useMutationData(
+    ['add-comment'],
+    (commentId) => toggleCommentLike({ userId, commentId }), // Use userId from this scope
+    'placesFromCity',
+  );
+
+//   const handleLike = (commentId: string) => {
+//   }
+
+
   const {mutate:addComment , isPending: isAddingCommentPending} = useMutationData(
     ['add-comment'],
     (newComment: {
         content: string;
         userId: string;
         placeId: string;
+        parentId?: string;
       })=>( createComment(newComment)),
     'placesFromCity',
     ()=>setNewComment("")
-    
   )
 
 //   const {latestVariables} = useMutationDataState(['handle-vote']) // for optimistic ui
@@ -93,14 +116,27 @@ const {mutate:mutateDelete , isPending: isDeletingCommentPending} = useMutationD
   )
 
 
-const handleComment = (placeId: string) => {
-    if (!newComment.trim()) return;
-    const content = newComment.trim();
-    addComment({
-      content,
-      userId,
-      placeId,
-    });
+const handleComment = (placeId: string, content: string, commentId?: string) => {
+    // if (!newComment.trim()) return;
+    // const content = newComment.trim();
+
+    if (commentId) {
+        const parentId = commentId;
+        addComment({
+            content,
+            userId,
+            placeId,
+            parentId,
+          });
+    
+    }else{
+        addComment({
+            content,
+            userId,
+            placeId,
+          });
+    }
+    
   };
 
 
@@ -226,77 +262,17 @@ const { mutate: addOrRemoveVote } = useMutation(
             <Bookmark className="w-4 h-4" />
           </Button>
         </div>
+            
+            <CommentSection
+                place={{ id: place.id, comments: place.comments }}
+                profileUrl={profileUrl}
+                handleComment={handleComment}
+                mutateDelete={mutateDelete}
+                handleLike={handleLike}
+            />
 
-        {/* Comments */}
-        <div className="space-y-4">
-          {place.comments &&
-            place.comments.map((comment) => (
-              <div key={comment.id} className="flex gap-3">
-                <Avatar className="h-8 w-8">
-                  <Image
-                    src={
-                      comment.user.profileUrl || "https://github.com/shadcn.png"
-                    }
-                    alt={comment.user.name || "User"}
-                    width={32}
-                    height={32}
-                  />
-                </Avatar>
-                <div className="flex-1">
-                  <div className="bg-accent rounded-lg p-3">
-                    <div className="flex justify-between items-center">
-                      <p className="font-semibold text-sm">
-                        {comment.user.name}
-                      </p>
-                      
-                      <button
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => mutateDelete(comment.id)}
-                        aria-label="Delete comment"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <p className="text-sm">{comment.content}</p>
-                  </div>
-                  <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
-                    <button className="hover:text-foreground">Like</button>
-                    <button className="hover:text-foreground">Reply</button>
-                    <span>
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
 
-          {/* Add Comment */}
-          <div className="flex gap-3 items-center">
-            <Avatar className="h-8 w-8">
-              <Image
-                src={profileUrl || "https://github.com/shadcn.png"}
-                alt="Your avatar"
-                width={32}
-                height={32}
-              />
-            </Avatar>
-            <div className="flex-1 flex gap-2">
-              <Textarea
-                placeholder="Add a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="min-h-0 h-9 py-2 resize-none"
-              />
-              <Button
-                size="icon"
-                onClick={() => handleComment(place.id)}
-                disabled={!newComment.trim()}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   );

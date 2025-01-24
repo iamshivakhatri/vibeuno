@@ -8,22 +8,48 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// model Comment {
+//   id          String    @id @default(cuid())
+//   content     String
+//   user        User      @relation(fields: [userId], references: [id])
+//   userId      String
+//   post        Place      @relation(fields: [placeId], references: [id])
+//   placeId      String
+//   createdAt   DateTime  @default(now())
+//   editedAt    DateTime?
+//   isEdited    Boolean   @default(false)
+//   likes       Int?
+//   reported    Boolean   @default(false)
+//   parentId    String?
+//   parent      Comment?  @relation("CommentToComment", fields: [parentId], references: [id])
+//   children    Comment[] @relation("CommentToComment")
+//   visible     Boolean   @default(true)
+// }
 model Comment {
   id          String    @id @default(cuid())
   content     String
   user        User      @relation(fields: [userId], references: [id])
   userId      String
   post        Place      @relation(fields: [placeId], references: [id])
-  placeId      String
+  placeId     String
   createdAt   DateTime  @default(now())
   editedAt    DateTime?
   isEdited    Boolean   @default(false)
-  likes       Int?
+  likes       Like[]    // Relation to the Like model
   reported    Boolean   @default(false)
   parentId    String?
   parent      Comment?  @relation("CommentToComment", fields: [parentId], references: [id])
   children    Comment[] @relation("CommentToComment")
   visible     Boolean   @default(true)
+}
+
+model Like {
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  comment     Comment   @relation(fields: [commentId], references: [id])
+  commentId   String
+  createdAt   DateTime  @default(now())
 }
 
 model City {
@@ -85,6 +111,7 @@ model User {
   interests String?
   createdAt DateTime @default(now())
   comments  Comment[] // Add this relation
+  commentLikes  Like[]   // Add this relation
   places    Place[]
   votedPlaces   Place[]  @relation("PlaceVotes") // Add this relation
   votes     Vote[]
