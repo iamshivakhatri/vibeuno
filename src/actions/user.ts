@@ -330,7 +330,6 @@ export async function getProfileUrl(userId: string) {
 }
 
 export async function getProfileFromClerk(userId: string) {
-  console.log("this is the userId at getprofilefromclerk", userId)
   try {
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
@@ -340,7 +339,6 @@ export async function getProfileFromClerk(userId: string) {
       },
     });
 
-    console.log("this is the user at getprofilefromclerk", user)
 
     if (!user) {
       throw new Error('User not found');
@@ -357,8 +355,7 @@ export async function getProfileFromClerk(userId: string) {
 
 export async function hasUserVotedForPlace(placeId: string, userId: string) {
 
-  console.log("this is the placeId", placeId)
-  console.log("this is the userId", userId)
+
   // here userId is the clerkId
   try {
     const user = await prisma.user.findUnique({
@@ -383,7 +380,6 @@ export async function hasUserVotedForPlace(placeId: string, userId: string) {
       select: { votedUsers: { where: { id: user?.id } } },
     });
 
-    console.log("this is the hasVoted", hasVoted)
 
      // Check if the user has voted for the place
 

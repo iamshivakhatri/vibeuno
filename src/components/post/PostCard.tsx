@@ -23,7 +23,7 @@ import { createComment } from "@/actions/place";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteComment } from "@/actions/place";
 import { useMutationData, useMutationDataState } from "@/hooks/useMutationData";
-import { voteForPlace, toggleCommentLike } from "@/actions/place";
+import { voteForPlace, toggleCommentLike, bookMarkPlace } from "@/actions/place";
 import { toast } from "sonner"
 import { CommentSection } from "./CommentSection"
 import { ImageCarousel } from "./ImageCarousel"
@@ -154,6 +154,11 @@ const handleComment = (placeId: string, content: string, commentId?: string) => 
     queryKey: ['vote-count', place.id],
     queryFn: () => getPlaceVoteCount(place.id),
   });
+
+  const {mutate:handleBookmark} = useMutationData(
+    ['handle-bookmark'],
+    (placeId: string) => bookMarkPlace({placeId, userId}),
+  )
 
 
 const { mutate: addOrRemoveVote } = useMutation(
@@ -312,7 +317,7 @@ const { mutate: addOrRemoveVote } = useMutation(
           <MessageSquare className="w-4 h-4" />
           <span>{place.comments.length}</span>
         </Button>
-        <Button variant="ghost" size="sm" className="ml-auto">
+        <Button variant="ghost" size="sm" className="ml-auto" onClick={() => (handleBookmark(place.id))}>
           <Bookmark className="w-4 h-4" />
         </Button>
       </div>

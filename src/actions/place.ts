@@ -98,7 +98,6 @@ export async function addPlace(formData: {
 // }
 
 export async function getCityData(name: string) {
-  console.log("Name at the start: ", name);
 
   if (!name) {
     console.error("No city name provided");
@@ -166,7 +165,6 @@ export async function getCityData(name: string) {
       return [];
     }
 
-    console.log("City data fetched successfully: ", JSON.stringify(cityData, null, 2));
     return cityData;
   } catch (error) {
     console.error("Error fetching city data:", error);
@@ -180,7 +178,6 @@ export async function deleteComment(commentId: string): Promise<void> {
     await prisma.comment.delete({
       where: { id: commentId },
     });
-    console.log(`Comment with ID ${commentId} deleted successfully.`);
   } catch (error) {
     console.error(`Error deleting comment with ID ${commentId}:`, error);
     throw new Error("Failed to delete comment.");
@@ -275,6 +272,7 @@ export async function getUserWishlist(userId: string): Promise<Place[]> {
             city: true,
             category: true,
             imageUrl: true,
+            image: true,
             createdAt: true,
             _count: {
               select: {
@@ -455,7 +453,6 @@ export async function voteForPlace(placeId: string, userId: string, hasVoted?: b
   // here userId is clerkId
   try {
 
-    console.log('Voting for place:', { placeId, userId });
 
     // Check if the user exists
     const user = await prisma.user.findUnique({
@@ -913,7 +910,6 @@ interface LikeCommentInput {
 
 export async function toggleCommentLike({ userId, commentId }: LikeCommentInput) {
   try {
-    console.log("Toggling like for comment:", { userId, commentId });
     // Check if the user has already liked the comment
     const existingLike = await prisma.like.findFirst({
       where: {
@@ -945,5 +941,45 @@ export async function toggleCommentLike({ userId, commentId }: LikeCommentInput)
   } catch (error) {
     console.error("Error toggling like:", error);
     throw new Error("Unable to toggle like. Please try again later.");
+  }
+}
+
+
+
+interface bookMarkPlaceProps {
+  userId: string;
+  placeId: string;
+}
+
+
+export async function bookMarkPlace({placeId, userId}: bookMarkPlaceProps){
+  try{
+    const existingBookmark = await prisma.wishlistItem.findFirst({
+      where: {
+        userId,
+        placeId
+      }
+    })
+
+    if(existingBookmark){
+      await prisma.wishlistItem.delete({
+        where: {
+          id: existingBookmark.id
+        }
+      })
+      return {message: 'Bookmark Removed.', action: 'unbookmark'}
+    }
+
+    await prisma.wishlistItem.create({
+      data: {
+        userId,
+        placeId
+      }
+    })
+    return {message: 'Bookmarked successfully', action: 'bookmark'}
+
+  }catch(error){
+    console.error('Error bookmarking place:', error);
+    return { error: 'Failed to bookmark place' };
   }
 }

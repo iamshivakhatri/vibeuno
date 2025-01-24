@@ -24,6 +24,7 @@ type Place = {
 };
 
 export function PlaceGrid({ places, viewMode = 'grid' }: PlaceGridProps) {
+  console.log( "places at profileplaces", places );
   // Check if there are no places and display a message if none found
   if (!places || places.length === 0) {
     return <div className="flex items-center justify-center h-[250px]">No places found.</div>;
