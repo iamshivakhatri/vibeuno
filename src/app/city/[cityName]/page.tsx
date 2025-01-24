@@ -98,7 +98,8 @@ export default function CityPage() {
 
   const { data: profileData } = useQuery({
     queryKey: ["profileData"],
-    queryFn: () => getProfileFromClerk(user?.id || ""),
+    queryFn: () => getProfileFromClerk(user?.id as string),
+    enabled: !!user?.id,
 
   });
   
