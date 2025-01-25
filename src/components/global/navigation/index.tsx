@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Compass, Globe2, Camera } from "lucide-react";
 import { LeftSidebar } from "@/components/left-sidebar";
 import { RightSidebar } from "@/components/right-sidebar";
+import Link from "next/link";
 
 interface MobileNavigationProps {
   trendingCities: Array<{ name: string; image: string; count: number }>;
@@ -40,7 +41,12 @@ export default function MobileNavigation({
         </Sheet>
 
         <Button variant="default">
+            <Link
+            href="/upload"
+            >
           <Camera className="h-5 w-5" />
+
+            </Link>
         </Button>
 
         <Sheet open={showRightSidebar} onOpenChange={setShowRightSidebar}>
