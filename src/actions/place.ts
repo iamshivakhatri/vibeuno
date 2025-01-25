@@ -1061,3 +1061,14 @@ export async function bookMarkPlace({placeId, userId}: bookMarkPlaceProps){
     return { error: 'Failed to bookmark place' };
   }
 }
+
+export async function getAllCityName(){
+  const cities = await prisma.city.findMany({
+    select: {
+      name: true,
+      country: true
+    }
+  })
+
+  return cities
+}

@@ -126,7 +126,7 @@ export function Navbar() {
 
         {/* <NavigationMenu className="hidden md:flex"> */}
         <NavigationMenu className={cn({ "md:flex": !isHomePage }, "hidden")}>
-          <NavigationMenuList>
+          {/* <NavigationMenuList>
             <NavigationMenuItem>
               <Link href="/explore" legacyBehavior passHref>
                 <NavigationMenuLink
@@ -161,7 +161,7 @@ export function Navbar() {
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
-          </NavigationMenuList>
+          </NavigationMenuList> */}
         </NavigationMenu>
 
         <div className="flex items-center space-x-4">
