@@ -120,7 +120,7 @@ export default async function HomeLayout({ children }: HomeLayoutProps) {
   // );
   return (
     <HydrationBoundary state={dehydrate(query)}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background text-base">
         <MobileNavigation
           trendingCities={trendingCities}
           upcomingEvents={upcomingEvents}
@@ -128,9 +128,9 @@ export default async function HomeLayout({ children }: HomeLayoutProps) {
         />
   
         {/* Main Layout */}
-        <div className="max-w-[1600px] mx-auto px-4 py-8 lg:grid lg:grid-cols-[280px_1fr_320px] lg:gap-8">
+        <div className="w-full max-w-[1600px] mx-auto px-4 py-8 lg:grid lg:grid-cols-[280px_1fr_320px] lg:gap-8">
           {/* Left Sidebar - Desktop */}
-          <div className="hidden lg:block lg:sticky lg:top-10 lg:max-h-screen lg:overflow-y-auto lg:py-16">
+          <div className="hidden lg:block lg:relative lg:top-0 lg:h-auto lg:overflow-y-auto lg:py-16">
             <LeftSidebar />
           </div>
   
@@ -138,7 +138,7 @@ export default async function HomeLayout({ children }: HomeLayoutProps) {
           <main className="space-y-6 mb-20 lg:mb-0">{children}</main>
   
           {/* Right Sidebar - Desktop */}
-          <div className="hidden lg:block lg:sticky lg:top-10 lg:max-h-screen lg:overflow-y-auto">
+          <div className="hidden lg:block lg:relative lg:top-0 lg:h-auto lg:overflow-y-auto">
             <RightSidebar
               trendingCities={trendingCities}
               upcomingEvents={upcomingEvents}
