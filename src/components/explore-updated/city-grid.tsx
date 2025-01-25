@@ -13,8 +13,7 @@ export default function CitiesGrid() {
 
   if (!cities) return null
 
-  console.log("This is the cities.",cities)
-  console.log("this is the image",cities[0].places[0].image[0])
+
 
   return (
     <div className="container mx-auto px-4 py-8">

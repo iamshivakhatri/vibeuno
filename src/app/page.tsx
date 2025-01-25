@@ -1,9 +1,7 @@
 "use client";
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Search, MapPin, Navigation, Plus } from 'lucide-react';
-import Image from 'next/image';
+
+import {  MapPin, Navigation, Plus } from 'lucide-react';
 import { TopContributors } from '@/components/top-contributors';
 import Link from 'next/link';
 import {Footer} from '@/components/footer';
@@ -12,15 +10,12 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 
-import { STATE_IMAGE_URLS } from '@/lib/states';
 import PopularPlaces from "@/components/places/popular-places"
-import { onAuthenticatedUser } from '@/actions/user';
 
 
 
 
 export default function Home() {
-  const isAuthenticated = onAuthenticatedUser();
   const [showStickyNav, setShowStickyNav] = useState(false);
 
   useEffect(() => {
