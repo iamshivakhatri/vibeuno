@@ -14,11 +14,13 @@ import { cn } from '@/lib/utils';
 
 import { STATE_IMAGE_URLS } from '@/lib/states';
 import PopularPlaces from "@/components/places/popular-places"
+import { onAuthenticatedUser } from '@/actions/user';
 
 
 
 
 export default function Home() {
+  const isAuthenticated = onAuthenticatedUser();
   const [showStickyNav, setShowStickyNav] = useState(false);
 
   useEffect(() => {

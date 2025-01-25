@@ -57,18 +57,16 @@ export async function getContributor() {
       take: 50,
     });
 
-
     // Map the contributors and calculate points
-      const topContributors = contributors
-    .map(contributor => ({
-      id: contributor.id,
-      name: contributor.name || contributor.email.split('@')[0],
-      profileUrl: contributor.profileUrl,
-      points: (contributor._count.places * 5) + (contributor._count.votedPlaces * 3),
-    }))
-    .sort((a, b) => b.points - a.points); // Sort by points in descending order
-
-
+    const topContributors = contributors
+      .map(contributor => ({
+        id: contributor.id,
+        name: contributor.name || contributor.email.split('@')[0],
+        profileUrl: contributor.profileUrl,
+        points: (contributor._count.places * 5) + (contributor._count.votedPlaces * 3),
+      }))
+      .filter(contributor => contributor.points > 0) // Include only those with points > 0
+      .sort((a, b) => b.points - a.points); // Sort by points in descending order
 
     return topContributors; // Return the result as an array
   } catch (error) {
@@ -76,6 +74,7 @@ export async function getContributor() {
     throw new Error('Error loading top contributors'); // Throw an error to be handled in the calling function
   }
 }
+
 
 export const onAuthenticatedUser = async () => {
   try {
@@ -470,12 +469,24 @@ export async function updateUserInfo(userId: string, key: string, value: string)
 export async function getUsers() {
   try {
     const users = await prisma.user.findMany({
+      where: {
+        places: {
+          some: {} // Ensures the user has at least one associated place
+        }
+      },
       select: {
         id: true,
         name: true,
         email: true,
         profileUrl: true,
         coverPhotoUrl: true,
+        occupation: true,
+        location: true,
+        places: {
+          select: {
+            id: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'

@@ -77,3 +77,5 @@ export type Place = {
     description: string;
     posts?: Post[];
   }
+
+  

@@ -790,25 +790,50 @@ export async function getPlacesData() {
 
 
 
+// export async function getCities() {
+//   try {
+//     const places = await prisma.place.findMany({
+//       select: {
+//         id: true,
+//         name: true,
+//         description: true,
+//         imageUrl: true,
+//         category: true,
+//         city: true,
+//         country: true,
+//         state: true,
+       
+//       },
+//       orderBy: {
+//         createdAt: 'desc',
+//       },
+//       take: 50,
+//     });
+
+//     return places;
+//   } catch (error) {
+//     console.error("Error fetching places:", error);
+//     return [];
+//   }
+// }
 export async function getCities() {
   try {
-    const places = await prisma.place.findMany({
-      where: {
-        NOT: {
-          name: {
-            not: null, // Exclude places with non-null names
-          },
-        },
-      },
+    const cities = await prisma.city.findMany({
       select: {
         id: true,
         name: true,
-        description: true,
-        imageUrl: true,
-        category: true,
-        city: true,
-        country: true,
         state: true,
+        country: true,
+        description: true,
+        coverImage: true,
+        createdAt: true,
+        updatedAt: true,
+        places: {
+          select: {
+            image:true,
+            imageUrl: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -816,9 +841,9 @@ export async function getCities() {
       take: 50,
     });
 
-    return places;
+    return cities;
   } catch (error) {
-    console.error("Error fetching places:", error);
+    console.error("Error fetching cities:", error);
     return [];
   }
 }

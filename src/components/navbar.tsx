@@ -58,7 +58,7 @@ export function Navbar() {
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           <div>
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/home" className="flex items-center space-x-2">
 
               <Image
                 src="/updated_vibeuno.png" // Path in public folder
@@ -102,7 +102,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div>
-        <Link href="/" className="flex items-center space-x-2">
+        <Link href="/home" className="flex items-center space-x-2">
           {/* <MapPin className="h-6 w-6 text-primary" /> */}
 
             <Image

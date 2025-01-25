@@ -15,6 +15,7 @@ import {
   MapPin,
   Building2,
   HomeIcon,
+  HotelIcon
 } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -52,7 +53,7 @@ export const LeftSidebar = () => {
           <Compass className="w-5 h-5" />
           <span className="font-medium">Explore</span>
         </Link>
-        <Link
+        {/* <Link
           href="/profile"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent"
         >
@@ -65,7 +66,7 @@ export const LeftSidebar = () => {
         >
           <Users className="w-5 h-5" />
           <span className="font-medium">Travel Buddies</span>
-        </Link>
+        </Link> */}
       </div>
 
       <div className="space-y-2">
@@ -83,8 +84,8 @@ export const LeftSidebar = () => {
           href="/transportation"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent"
         >
-          <Plane className="w-5 h-5" />
-          Transportation
+          <HotelIcon className="w-5 h-5" />
+          Hotels
         </Link>
 
         {/* <Link
@@ -98,7 +99,7 @@ export const LeftSidebar = () => {
 
       <div className="space-y-2">
         <h3 className="font-semibold px-2">Cities</h3>
-        <div className="h-48 overflow-y-auto border rounded-lg p-2">
+        <div className="h-32 overflow-y-auto border rounded-lg p-2">
           {cities &&
             cities.map((city, index) => (
               <Link
@@ -121,7 +122,7 @@ export const LeftSidebar = () => {
       </div>
 
       {/* Quick Access */}
-      <div className="space-y-4">
+      {/* <div className="space-y-4">
         <h3 className="font-semibold px-2">Quick Access</h3>
         <div className="space-y-2">
           <Button variant="ghost" className="w-full justify-start gap-2">
@@ -133,7 +134,10 @@ export const LeftSidebar = () => {
             Travel Forums
           </Button>
         </div>
-      </div>
+      </div> */}
+
+
+      
     </div>
   );
 };

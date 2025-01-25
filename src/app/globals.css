@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+
 :root {
   --primary: 2 100% 60%; /* Airbnb-like red */
   --primary-foreground: 0 0% 100%;
@@ -21,7 +28,7 @@
   --muted: 0 0% 96.1%;
   --muted-foreground: 0 0% 45.1%;
   
-  --accent: 2 100% 97%;
+  --accent: 2 100% 94%;
   --accent-foreground: 2 100% 60%;
   
   --destructive: 0 84.2% 60.2%;

@@ -9,7 +9,7 @@ const AuthCallbackPage = async () => {
 
     if (auth.status === 200 || auth.status === 201) {
       // Set the redirect path to home
-      redirectPath = '/'
+      redirectPath = '/home'
     }
 
     if (auth.status === 403 || auth.status === 400 || auth.status === 500) {

@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button"
 
 export function Footer() {
   return (
-    <footer className="relative bg-gradient-to-br from-primary/10 via-primary/5 to-background pt-16 pb-6 overflow-hidden">
+    <footer className="relative bg-accent  pt-16 pb-6 overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-primary"></div>
       <div className="container relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2 group">
               <MapPin className="h-6 w-6 text-primary group-hover:text-secondary transition-colors duration-300" />
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-primary">TravelVote</span>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-primary">Vibeuno</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Discover and share the best places to visit across states and cities. Your adventure starts here!
@@ -51,21 +51,7 @@ export function Footer() {
             </ul>
           </div>
           
-          {/* <div>
-            <h3 className="mb-4 text-sm font-semibold">Stay Connected</h3>
-            <p className="text-sm text-muted-foreground mb-4">Subscribe to our newsletter for travel tips and exclusive offers.</p>
-            <form className="flex space-x-2">
-              <Input 
-                type="email" 
-                placeholder="Enter your email" 
-                className="flex-grow"
-              />
-              <Button type="submit" size="sm">
-                <Send size={16} className="mr-2" />
-                Subscribe
-              </Button>
-            </form>
-          </div> */}
+
         </div>
         
         <div className="border-t border-border pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
