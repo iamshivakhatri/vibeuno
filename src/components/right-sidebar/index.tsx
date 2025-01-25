@@ -54,7 +54,7 @@ export const RightSidebar = ({ trendingCities, upcomingEvents, localExperts }: R
         </div>
   
         {/* Upcoming Events */}
-        <div className="bg-card rounded-lg p-6">
+        <div className="bg-card rounded-lg p-2">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-5 h-5" />
             <h3 className="text-lg font-semibold">Events & Festivals</h3>
