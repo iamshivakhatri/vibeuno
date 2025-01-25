@@ -19,46 +19,61 @@ import { useQueryData } from "@/hooks/useQueryData";
 
 
 // Types based on your schema
+// type Place = {
+//   id: string;
+//   name: string | null;
+//   caption?: string | null;
+//   description?: string | null;
+//   image?: string[];
+//   imageUrl?: string | null;
+//   category?: string | null;
+//   numVotes: number | 0;
+//   comments: Comment[];
+//   user: User;
+//   createdAt: string;
+// };
+
 type Place = {
   id: string;
   name: string | null;
-  caption?: string | null;
-  description?: string | null;
-  image?: string[];
-  imageUrl?: string | null;
-  category?: string | null;
-  numVotes: number | 0;
+  caption: string | null;
+  description: string | null;
+  image: string[] | null;
+  imageUrl: string | null;
+  category: string | null;
+  numVotes: number;
   comments: Comment[];
   user: User;
-  createdAt: string;
+  createdAt: Date;
 };
 
 
 
 type User = {
   id: string;
-  name: string;
-  profileUrl?: string | undefined
-  occupation?: string;
+  name: string | null;
+  profileUrl: string | null;
+  occupation: string | null;
 };
 
 type Comment = {
-  id: string
-  content: string
+  id: string;
+  content: string;
   user: {
-    id: string
-    name: string
-    profileUrl: string
-  }
-  userId: string
-  placeId: string
-  createdAt: string
-  editedAt?: string
-  isEdited: boolean
-  likes?: number
-  reported: boolean
-  parentId?: string
-  visible: boolean
+    id: string;
+    name: string;
+    profileUrl: string | null;
+    occupation: string | null;
+  };
+  userId: string;
+  placeId: string;
+  createdAt: Date;
+  editedAt: Date | null;
+  isEdited: boolean;
+  likes: number;
+  reported: boolean;
+  parentId: string | null;
+  visible: boolean;
 };
 
 type placesDataProps = {
@@ -183,7 +198,7 @@ const filteredPlaces =
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Places Feed */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {/* Category Pills */}
             <ScrollArea className="w-full whitespace-nowrap pb-4">
               <div className="flex gap-2">
@@ -209,28 +224,6 @@ const filteredPlaces =
                 )
      
               ))}
-            </div>
-          </div>
-
-          {/* Right Column - City Info & Categories */}
-          <div className="space-y-6">
-            <div className="bg-card rounded-lg p-6 sticky top-10">
-              <h3 className="text-lg font-semibold mb-4">
-                About {formattedCityName}
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Discover the best places, share your experiences, and connect
-                with fellow travelers in {formattedCityName}. From hidden gems
-                to popular attractions, find everything you need to know about
-                this amazing city.
-              </p>
-
-                <Button
-                 className="w-full"
-                 onClick={() => router.push(`/upload`)}
-                 >
-                  Share Your Experience
-               </Button>
             </div>
           </div>
         </div>

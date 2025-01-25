@@ -27,57 +27,67 @@ import { voteForPlace, toggleCommentLike, bookMarkPlace } from "@/actions/place"
 import { toast } from "sonner"
 import { CommentSection } from "./CommentSection"
 import { ImageCarousel } from "./ImageCarousel"
+import { JsonValue } from "@prisma/client/runtime/library";
 
 
 type Place = {
   id: string;
   name: string | null;
-  caption?: string | null;
-  description?: string | null;
-  image?: string[];
-  imageUrl?: string | null;
-  category?: string | null;
-  numVotes: number | 0;
+  caption: string | null;
+  description: string | null;
+  image: string[] | null;
+  imageUrl: string | null;
+  category: string | null;
+  numVotes: number;
   comments: Comment[];
   user: User;
-  createdAt: string;
+  createdAt: Date;
 };
 
 type User = {
   id: string;
-  name: string;
-  profileUrl?: string;
-  occupation?: string;
+  name: string | null;
+  profileUrl: string | null;
+  occupation: string | null;
 };
 
 type Comment = {
-    id: string
-    content: string
-    user: {
-      id: string
-      name: string
-      profileUrl: string
-    }
-    userId: string
-    placeId: string
-    createdAt: string
-    editedAt?: string
-    isEdited: boolean
-    likes?: number
-    reported: boolean
-    parentId?: string
-    visible: boolean
+  id: string;
+  content: string;
+  user: {
+    id: string;
+    name: string;
+    profileUrl: string | null;
+    occupation: string | null;
+  };
+  userId: string;
+  placeId: string;
+  createdAt: Date;
+  editedAt: Date | null;
+  isEdited: boolean;
+  likes: number;
+  reported: boolean;
+  parentId: string | null;
+  visible: boolean;
 };
-
 type PostCardProps = {
   place: Place;
-
   profileUrl: string | null | undefined;
-
   userId: string;
-
   clerkId: string | undefined;
 };
+
+
+
+// type PostCardProps = {
+//   place: Place;
+
+//   profileUrl: string | null | undefined;
+
+//   userId: string;
+
+//   clerkId: string | undefined;
+// };
 
 const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
 
@@ -288,7 +298,7 @@ const { mutate: addOrRemoveVote } = useMutation(
       <Avatar className="h-10 w-10">
         <Image
           src={place.user.profileUrl || "https://github.com/shadcn.png"}
-          alt={place.user.name}
+          alt={place.user.name || "User"}
           width={40}
           height={40}
         />

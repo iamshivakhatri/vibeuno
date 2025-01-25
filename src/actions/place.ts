@@ -8,6 +8,8 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation";
 
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import {Place as PlaceType} from "@/components/post/index.type";
+
 
 
 
@@ -821,53 +823,129 @@ export async function getCities() {
   }
 }
 
+// export async function getPost() {
+//   try {
+//     const places = await prisma.place.findMany({
+//       select: {
+//         id: true,
+//         name: true,
+//         caption: true,
+//         description: true,
+//         imageUrl: true,
+//         image: true,
+//         category: true,
+//         numVotes: true,
+//         createdAt: true,
+//         comments: {
+//           select: {
+//             id: true,
+//             content: true,
+//             createdAt: true,
+//             likes: true,
+//             parentId: true,
+//             user: {
+//               select: {
+//                 id: true,
+//                 name: true,
+//                 profileUrl: true,
+//                 occupation: true,
+//               },
+//             },
+//           },
+//         },
+//         user: {
+//           select: {
+//             id: true,
+//             name: true,
+//             profileUrl: true,
+//             occupation: true,
+//           },
+//         },
+//       },
+//       orderBy: {
+//         createdAt: 'desc',
+//       },
+//       take: 50,
+//     });
+
+//      return places;
+
+//   } catch (error) {
+//     console.error("Error fetching places:", error);
+//     return [];
+//   }
+// }
+
+
+
 export async function getPost() {
   try {
     const places = await prisma.place.findMany({
       select: {
         id: true,
         name: true,
-        description: true,
-        image: true,
-        city: true,
-        category: true,
         caption: true,
+        description: true,
+        imageUrl: true,
+        image: true, // Ensure this is an array of strings
+        category: true,
         numVotes: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            profileUrl: true,
-          },
-        },
+        createdAt: true,
         comments: {
           select: {
             id: true,
             content: true,
+            userId: true,
+            placeId: true,
             createdAt: true,
+            editedAt: true,
+            isEdited: true,
+            likes: {
+              select: {
+                userId: true,
+                id: true,
+                createdAt: true,
+                commentId: true,
+              },
+            },
+            reported: true,
+            parentId: true,
+            visible: true,
             user: {
               select: {
                 id: true,
                 name: true,
                 profileUrl: true,
+                occupation: true,
               },
             },
           },
         },
-        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profileUrl: true,
+            occupation: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
-      take: 50,
     });
 
-    return places;
+    // Transform data to ensure types align
+    return  places
+
   } catch (error) {
     console.error("Error fetching places:", error);
     return [];
   }
 }
+
+
+
 
 
 type CreateCommentInput = {

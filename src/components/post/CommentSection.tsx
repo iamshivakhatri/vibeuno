@@ -1,90 +1,3 @@
-// import { useState } from "react"
-// import { Comment } from "./Comment"
-// import { Avatar } from "@/components/ui/avatar"
-// import { Textarea } from "@/components/ui/textarea"
-// import { Button } from "@/components/ui/button"
-// import { Send } from "lucide-react"
-// import Image from "next/image"
-
-// interface CommentSectionProps {
-//   place: {
-//     id: string
-//     comments: CommentType[]
-//   }
-//   profileUrl: string
-//   handleComment: (placeId: string, content: string, parentId?: string) => void
-//   mutateDelete: (commentId: string) => void
-//   handleLike: (commentId: string) => void
-// }
-
-// export interface CommentType {
-//   id: string
-//   content: string
-//   user: {
-//     id: string
-//     name: string
-//     profileUrl: string
-//   }
-//   userId: string
-//   placeId: string
-//   createdAt: string
-//   editedAt?: string
-//   isEdited: boolean
-//   likes?: number
-//   reported: boolean
-//   parentId?: string
-//   visible: boolean
-// }
-
-// export function CommentSection({ place, profileUrl, handleComment, mutateDelete, handleLike }: CommentSectionProps) {
-//   const [newComment, setNewComment] = useState("")
-
-//   const renderComments = (comments: CommentType[], parentId: string | null = null, depth = 0) => {
-//     return comments
-//       .filter((comment) => comment.parentId === parentId)
-//       .map((comment) => (
-//         <div key={comment.id} style={{ marginLeft: `${depth * 20}px` }}>
-//           <Comment
-//             comment={comment}
-//             handleReply={(content) => handleComment(place.id, content, comment.id)}
-//             handleLike={() => handleLike(comment.id)}
-//             mutateDelete={() => mutateDelete(comment.id)}
-//           />
-//           {renderComments(comments, comment.id, depth + 1)}
-//         </div>
-//       ))
-//   }
-
-//   return (
-//     <div className="space-y-4">
-//       {renderComments(place.comments)}
-
-//       <div className="flex gap-3 items-center">
-//         <Avatar className="h-8 w-8">
-//           <Image src={profileUrl || "https://github.com/shadcn.png"} alt="Your avatar" width={32} height={32} />
-//         </Avatar>
-//         <div className="flex-1 flex gap-2">
-//           <Textarea
-//             placeholder="Add a comment..."
-//             value={newComment}
-//             onChange={(e) => setNewComment(e.target.value)}
-//             className="min-h-0 h-9 py-2 resize-none"
-//           />
-//           <Button
-//             size="icon"
-//             onClick={() => {
-//               handleComment(place.id, newComment)
-//               setNewComment("")
-//             }}
-//             disabled={!newComment.trim()}
-//           >
-//             <Send className="h-4 w-4" />
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
 
 import { useState } from "react"
 import { Comment } from "./Comment"
@@ -105,24 +18,27 @@ interface CommentSectionProps {
   handleLike: (commentId: string) => void
 }
 
-export interface CommentType {
-  id: string
-  content: string
+
+
+export type CommentType = {
+  id: string;
+  content: string;
   user: {
-    id: string
-    name: string
-    profileUrl: string
-  }
-  userId: string
-  placeId: string
-  createdAt: string
-  editedAt?: string
-  isEdited: boolean
-  likes?: number
-  reported: boolean
-  parentId?: string
-  visible: boolean
-}
+    id: string;
+    name: string;
+    profileUrl: string | null;
+    occupation: string | null;
+  };
+  userId: string;
+  placeId: string;
+  createdAt: Date;
+  editedAt: Date | null;
+  isEdited: boolean;
+  likes: number;
+  reported: boolean;
+  parentId: string | null;
+  visible: boolean;
+};
 
 export function CommentSection({ place, profileUrl, handleComment, mutateDelete, handleLike }: CommentSectionProps) {
   const [newComment, setNewComment] = useState("")

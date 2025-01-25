@@ -1,68 +1,192 @@
-// 'use client';
+
+
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { getPost } from "@/actions/place";
+import { getProfileFromClerk } from "@/actions/user";
+import { useUser } from "@clerk/nextjs";
+import PostCard from "@/components/post/PostCard";
+import {Place as PlaceType} from "@/components/post/index.type";
 
 
 
-import { getPost,  getPlaces } from '@/actions/place';
-// import { PostCard } from '@/components/home/post-card';
-import { CityCard } from '@/components/home/city-card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, TrendingUp, MapPin } from 'lucide-react';
 
-export  default async function Home() {
-    const posts = await  getPost();
-    console.log("this is the posts", posts)
+import { useQuery } from "@tanstack/react-query";
+import { JsonValue } from "@prisma/client/runtime/library";
 
-//     return (
-//         <div>
-//             <div className="container mx-auto px-4 py-8">
-//                 <div className="flex items-center justify-center mb-8">
-//                     this is the home page
-//                 </div>
-//             </div>
-//         </div>
-//     )}
-  return (
-     <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8">
-            <section className="mb-8">
-              {/* <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold">Trending Posts</h2>
-                <Button variant="ghost" size="sm">
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  See all
-                </Button>
-              </div> */}
-              <div className="space-y-6">
-                 {/* {posts?.map((post) => (
-                  <PostCard key={post.id} post={post} />
-                ))} */}
-              </div>
-            </section>
+
+const FILTERS = ["Trending", "Latest", "Most Voted", "Following"];
+const CATEGORIES = [
+  "All",
+  "Restaurants",
+  "Parks",
+  "Museums",
+  "Nightlife",
+  "Shopping",
+  "Architecture",
+  "Hidden Gems",
+];
+
+
+
+type Place = {
+  id: string;
+  name: string | null;
+  caption: string | null;
+  description: string | null;
+  image: string[] | null;
+  imageUrl: string | null;
+  category: string | null;
+  numVotes: number;
+  comments: Comment[];
+  user: User;
+  createdAt: Date;
+};
+
+type User = {
+  id: string;
+  name: string | null;
+  profileUrl: string | null;
+  occupation: string | null;
+};
+
+type Comment = {
+  id: string;
+  content: string;
+  user: {
+    id: string;
+    name: string;
+    profileUrl: string | null;
+    occupation: string | null;
+  };
+  userId: string;
+  placeId: string;
+  createdAt: Date;
+  editedAt: Date | null;
+  isEdited: boolean;
+  likes: number;
+  reported: boolean;
+  parentId: string | null;
+  visible: boolean;
+};
+
+
+type PostCardProps = {
+  place: Place;
+  profileUrl: string | null | undefined;
+  userId: string;
+  clerkId: string | undefined;
+};
+
+
+
+
+export default function HomePage() {
+  const [selectedFilter, setSelectedFilter] = useState("Trending");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [newComment, setNewComment] = useState("");
+  const { user } = useUser();
+
+
+  const { data: profileData } = useQuery({
+    queryKey: ["profileData"],
+    queryFn: () => getProfileFromClerk(user?.id as string),
+    enabled: !!user?.id,
+
+  });
+
+
+  const { data: places } = useQuery({
+    queryKey: ["all-posts"],
+    queryFn: () => getPost(),
+  });
+
+  console.log("this is the places. in the home", places )
+
+
+  const handleComment = (placeId: string) => {
+    if (!newComment.trim()) return;
+    console.log("Adding comment to place:", placeId, newComment);
+    setNewComment("");
+  };
+
+  const processedPlaces = (places ?? []).map((place) => ({
+    ...place,
+    name: place.name ?? '',
+    image: Array.isArray(place.image) ? place.image.filter((img): img is string => typeof img === 'string') : [],
+    comments: place.comments.map(comment => ({
+      ...comment,
+      user: {
+        ...comment.user,
+        name: comment.user.name ?? '',
+      },
+      likes: comment.likes?.length || 0  // Convert likes array to number
+    }))
+  }));
+
+
+  // Filter places based on selectedCategory
+  const filteredPlaces =
+  selectedCategory === "All"
+    ?  processedPlaces ?? []
+    : ( processedPlaces ?? []).filter((place) => place.category === selectedCategory);
+
+    return (
+      <div className="space-y-8">
+        {/* Categories Section */}
+        <div className="relative">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
           </div>
-
-          {/* <div className="lg:col-span-4">
-            <div className="sticky top-4">
-              <section className="mb-8">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-semibold">Popular Cities</h2>
-                  <Button variant="ghost" size="sm">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    Explore
-                  </Button>
-                </div>
-                <div className="space-y-4">
-                  {mockCities.map((city) => (
-                    <CityCard key={city.id} city={city} />
-                  ))}
-                </div>
-              </section>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <ScrollArea className="px-8">
+            <div className="flex gap-4 pb-2 overflow-x-auto">
+              {CATEGORIES.map((category) => (
+                <Button
+                  key={category}
+                  variant={selectedCategory === category ? "default" : "outline"}
+                  onClick={() => setSelectedCategory(category)}
+                  className="rounded-full whitespace-nowrap"
+                  size="sm"
+                >
+                  {category}
+                </Button>
+              ))}
             </div>
-          </div> */}
-
-
+          </ScrollArea>
         </div>
-      </main>
-    )
-}
+    
+        {/* Posts Layout */}
+        <div className="grid grid-cols-1  gap-6 px-8">
+          {processedPlaces?.map((place) =>
+            profileData?.profileUrl && profileData?.userId && (
+              <PostCard
+                key={place.id}
+                place={place}
+                profileUrl={profileData.profileUrl}
+                clerkId={user?.id}
+                userId={profileData.userId}
+              />
+            )
+          )}
+        </div>
+      </div>
+    );
+  }
+    
+
+
+   
