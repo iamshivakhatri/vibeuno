@@ -170,7 +170,7 @@ export default function HomePage() {
         </div>
     
         {/* Posts Layout */}
-        <div className="grid grid-cols-1  gap-6 md:px-8">
+        <div className="grid grid-cols-1  gap-6 ">
           {processedPlaces?.map((place) =>
             profileData?.profileUrl && profileData?.userId && (
               <PostCard

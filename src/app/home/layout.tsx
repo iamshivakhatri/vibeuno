@@ -1,13 +1,6 @@
 // layout.tsx (inside /home)
 import { LeftSidebar } from "@/components/left-sidebar";
 import { RightSidebar } from "@/components/right-sidebar";
-import { getPost } from "@/actions/place";
-import {
-  QueryClient,
-  QueryClientProvider,
-  HydrationBoundary,
-  dehydrate,
-} from "@tanstack/react-query";
 
 interface HomeLayoutProps {
   children: ReactNode;
@@ -15,27 +8,7 @@ interface HomeLayoutProps {
 import { ReactNode, useState } from "react";
 import MobileNavigation from "@/components/global/navigation";
 
-export default async function HomeLayout({ children }: HomeLayoutProps) {
-  const query = new QueryClient();
-  await query.prefetchQuery({
-    queryKey: ["all-posts"],
-    queryFn: () => getPost(),
-  });
-
-  // await query.prefetchQuery({
-  //     queryKey:["user-videos"],
-  //     queryFn: ()=> getAllUserVideos(workspaceId),
-  // })
-  // await query.prefetchQuery({
-  //     queryKey:["user-workspaces"],
-  //     queryFn: ()=> getWorkspaces(),
-  // })
-
-  // await query.prefetchQuery({
-  //     queryKey:["user-notifications"],
-  //     queryFn: ()=> getNotifications(),
-  // })
-
+export default function HomeLayout({ children }: HomeLayoutProps) {
   const trendingCities = [
     {
       name: "Dallas",
@@ -85,68 +58,38 @@ export default async function HomeLayout({ children }: HomeLayoutProps) {
     },
   ];
 
-  // return (
-  //   <HydrationBoundary state={dehydrate(query)}>
-  //     <div className="min-h-screen bg-background">
-  //       {/* Mobile Navigation */}
-
-  //       <MobileNavigation
-  //         trendingCities={trendingCities}
-  //         upcomingEvents={upcomingEvents}
-  //         localExperts={localExperts}
-  //       />
-
-  //       {/* Main Layout */}
-  //       <div className="max-w-[1600px] mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
-  //         {/* Left Sidebar - Desktop */}
-  //         <div className="hidden lg:block sticky top-10 h-screen overflow-y-auto py-16">
-  //           <LeftSidebar />
-  //         </div>
-
-  //         {/* Main Content */}
-  //         <main className="space-y-6 mb-20 lg:mb-0">{children}</main>
-
-  //         {/* Right Sidebar - Desktop */}
-  //         <div className="hidden lg:block sticky top-10 h-screen overflow-y-auto">
-  //           <RightSidebar
-  //             trendingCities={trendingCities}
-  //             upcomingEvents={upcomingEvents}
-  //             localExperts={localExperts}
-  //           />
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </HydrationBoundary>
-  // );
   return (
-    <HydrationBoundary state={dehydrate(query)}>
-      <div className="min-h-screen bg-background text-base">
-        <MobileNavigation
-          trendingCities={trendingCities}
-          upcomingEvents={upcomingEvents}
-          localExperts={localExperts}
-        />
-  
-        {/* Main Layout */}
-        <div className="w-full max-w-[1600px] mx-auto px-4 py-8 lg:grid lg:grid-cols-[280px_1fr_320px] lg:gap-8">
-          {/* Left Sidebar - Desktop */}
-          <div className="hidden lg:block lg:relative lg:top-0 lg:h-auto lg:overflow-y-auto lg:py-16">
-            <LeftSidebar />
-          </div>
-  
-          {/* Main Content */}
-          <main className="space-y-6 mb-20 lg:mb-0">{children}</main>
-  
-          {/* Right Sidebar - Desktop */}
-          <div className="hidden lg:block lg:relative lg:top-0 lg:h-auto lg:overflow-y-auto">
-            <RightSidebar
-              trendingCities={trendingCities}
-              upcomingEvents={upcomingEvents}
-              localExperts={localExperts}
-            />
-          </div>
+    <div className="min-h-screen bg-background">
+      {/* Mobile Navigation */}
+
+      <MobileNavigation
+        trendingCities={trendingCities}
+        upcomingEvents={upcomingEvents}
+        localExperts={localExperts}
+      />
+
+      {/* Main Layout */}
+      <div className="max-w-[1600px] mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
+        {/* Left Sidebar - Desktop */}
+        <div className="hidden lg:block sticky top-10 h-screen overflow-y-auto py-16">
+          <LeftSidebar />
+        </div>
+
+        {/* Main Content */}
+        <main className="space-y-6 mb-20 lg:mb-0">{children}</main>
+
+        {/* Right Sidebar - Desktop */}
+        <div className="hidden lg:block sticky top-10 h-screen overflow-y-auto">
+          <RightSidebar
+            trendingCities={trendingCities}
+            upcomingEvents={upcomingEvents}
+            localExperts={localExperts}
+          />
         </div>
       </div>
-    </HydrationBoundary>
+
+
+      
+    </div>
   );
 }
