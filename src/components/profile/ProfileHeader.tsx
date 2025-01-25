@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUserInfo } from "@/actions/user"; // Import server-side action
 import { useState } from "react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner"
 import axios from "axios";
 
 import {
@@ -84,7 +84,7 @@ export default function ProfileHeader({
 
       // Update the user's cover photo URL in the state
       if (data?.imageUrl) {
-        toast({ title: "Cover photo updated!" });
+        toast( "Cover photo updated!" );
         // setUser({ ...user, coverPhotoUrl: data.imageUrl });
       }
     } catch (error) {
@@ -116,17 +116,17 @@ export default function ProfileHeader({
       });
 
       if (data.success) {
-        toast({ title: "Profile picture updated!" });
+        toast( "Profile picture updated!" );
       }
 
       // Update the profile URL on the page
       window.location.reload();
     } catch (error) {
       console.error(error);
-      toast({
-        title: "Failed to update profile picture. Please try again.",
-        variant: "destructive",
-      });
+      toast(
+       "Failed to update profile picture. Please try again."
+
+      );
     } finally {
       setUploading(false);
     }
@@ -135,7 +135,7 @@ export default function ProfileHeader({
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/profile/${user.id}`;
     await navigator.clipboard.writeText(shareUrl);
-    toast({ title: "Profile link copied to clipboard!" });
+    toast("Profile link copied to clipboard!" );
   };
 
   const toggleEdit = (field: keyof typeof editMode) => {
@@ -173,15 +173,11 @@ export default function ProfileHeader({
         // Revert both local state and cache on error
         setLocalUser(context?.previousUser as typeof user);
         queryClient.setQueryData(['user', user.id], context?.previousUser);
-        toast({
-          title: "Failed to update profile",
-          variant: "destructive",
-        });
+        toast("Failed to update profile");
       },
       onSuccess: () => {
-        toast({
-          title: "Profile updated successfully",
-        });
+        toast("Profile updated successfully");
+
       },
     });
 

@@ -138,8 +138,57 @@ export default function HomePage() {
     ?  processedPlaces ?? []
     : ( processedPlaces ?? []).filter((place) => place.category === selectedCategory);
 
+    // return (
+    //   <div className="space-y-8">
+    //     {/* Categories Section */}
+    //     <div className="relative">
+    //       <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+    //         <Button variant="ghost" size="icon" className="h-8 w-8">
+    //           <ChevronLeft className="h-4 w-4" />
+    //         </Button>
+    //       </div>
+    //       <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10">
+    //         <Button variant="ghost" size="icon" className="h-8 w-8">
+    //           <ChevronRight className="h-4 w-4" />
+    //         </Button>
+    //       </div>
+    //       <ScrollArea className="px-8">
+    //         <div className="flex gap-4 pb-2 overflow-x-auto">
+    //           {CATEGORIES.map((category) => (
+    //             <Button
+    //               key={category}
+    //               variant={selectedCategory === category ? "default" : "outline"}
+    //               onClick={() => setSelectedCategory(category)}
+    //               className="rounded-full whitespace-nowrap"
+    //               size="sm"
+    //             >
+    //               {category}
+    //             </Button>
+    //           ))}
+    //         </div>
+    //       </ScrollArea>
+    //     </div>
+    
+    //     {/* Posts Layout */}
+    //     <div className="grid grid-cols-1  gap-6 ">
+    //       {processedPlaces?.map((place) =>
+    //         profileData?.profileUrl && profileData?.userId && (
+    //           <PostCard
+    //             key={place.id}
+    //             place={place}
+    //             profileUrl={profileData.profileUrl}
+    //             clerkId={user?.id}
+    //             userId={profileData.userId}
+    //           />
+    //         )
+    //       )}
+    //     </div>
+    //   </div>
+    // );
     return (
-      <div className="space-y-8">
+      // <div className="space-y-8 max-w-full md:max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto px-4">
+            <div className="min-h-screen bg-background">
+
         {/* Categories Section */}
         <div className="relative">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
@@ -168,9 +217,9 @@ export default function HomePage() {
             </div>
           </ScrollArea>
         </div>
-    
+        
         {/* Posts Layout */}
-        <div className="grid grid-cols-1  gap-6 ">
+        <div className="grid grid-cols-1 gap-6">
           {processedPlaces?.map((place) =>
             profileData?.profileUrl && profileData?.userId && (
               <PostCard
@@ -184,7 +233,7 @@ export default function HomePage() {
           )}
         </div>
       </div>
-    );
+    );    
   }
     
 

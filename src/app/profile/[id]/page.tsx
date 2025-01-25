@@ -1,4 +1,4 @@
-import { ProfileHeader } from '@/components/profile/profile-header';
+import ProfileHeader from '@/components/profile/ProfileHeader';
 import { PlaceTabs } from '@/components/profile/place-tabs';
 import { notFound } from 'next/navigation';
 import { getProfileData, getUserById } from '@/actions/user';
