@@ -85,29 +85,60 @@ export default async function HomeLayout({ children }: HomeLayoutProps) {
     },
   ];
 
+  // return (
+  //   <HydrationBoundary state={dehydrate(query)}>
+  //     <div className="min-h-screen bg-background">
+  //       {/* Mobile Navigation */}
+
+  //       <MobileNavigation
+  //         trendingCities={trendingCities}
+  //         upcomingEvents={upcomingEvents}
+  //         localExperts={localExperts}
+  //       />
+
+  //       {/* Main Layout */}
+  //       <div className="max-w-[1600px] mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
+  //         {/* Left Sidebar - Desktop */}
+  //         <div className="hidden lg:block sticky top-10 h-screen overflow-y-auto py-16">
+  //           <LeftSidebar />
+  //         </div>
+
+  //         {/* Main Content */}
+  //         <main className="space-y-6 mb-20 lg:mb-0">{children}</main>
+
+  //         {/* Right Sidebar - Desktop */}
+  //         <div className="hidden lg:block sticky top-10 h-screen overflow-y-auto">
+  //           <RightSidebar
+  //             trendingCities={trendingCities}
+  //             upcomingEvents={upcomingEvents}
+  //             localExperts={localExperts}
+  //           />
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </HydrationBoundary>
+  // );
   return (
     <HydrationBoundary state={dehydrate(query)}>
       <div className="min-h-screen bg-background">
-        {/* Mobile Navigation */}
-
         <MobileNavigation
           trendingCities={trendingCities}
           upcomingEvents={upcomingEvents}
           localExperts={localExperts}
         />
-
+  
         {/* Main Layout */}
-        <div className="max-w-[1600px] mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-[280px_1fr_320px] gap-8">
+        <div className="max-w-[1600px] mx-auto px-4 py-8 lg:grid lg:grid-cols-[280px_1fr_320px] lg:gap-8">
           {/* Left Sidebar - Desktop */}
-          <div className="hidden lg:block sticky top-10 h-screen overflow-y-auto py-16">
+          <div className="hidden lg:block lg:sticky lg:top-10 lg:max-h-screen lg:overflow-y-auto lg:py-16">
             <LeftSidebar />
           </div>
-
+  
           {/* Main Content */}
           <main className="space-y-6 mb-20 lg:mb-0">{children}</main>
-
+  
           {/* Right Sidebar - Desktop */}
-          <div className="hidden lg:block sticky top-10 h-screen overflow-y-auto">
+          <div className="hidden lg:block lg:sticky lg:top-10 lg:max-h-screen lg:overflow-y-auto">
             <RightSidebar
               trendingCities={trendingCities}
               upcomingEvents={upcomingEvents}
