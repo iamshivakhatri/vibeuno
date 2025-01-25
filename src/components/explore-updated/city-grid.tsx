@@ -20,7 +20,7 @@ export default function CitiesGrid() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h2 className="text-3xl font-bold mb-2">Popular Cities</h2>
-        <p className="text-muted-foreground">Explore the world's most vibrant destinations</p>
+        <p className="text-muted-foreground">Explore the world&apos;s most vibrant destinations</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cities.map((city) => (

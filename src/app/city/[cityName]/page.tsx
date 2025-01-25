@@ -18,20 +18,6 @@ import { getProfileFromClerk } from "@/actions/user";
 import { useQueryData } from "@/hooks/useQueryData";
 
 
-// Types based on your schema
-// type Place = {
-//   id: string;
-//   name: string | null;
-//   caption?: string | null;
-//   description?: string | null;
-//   image?: string[];
-//   imageUrl?: string | null;
-//   category?: string | null;
-//   numVotes: number | 0;
-//   comments: Comment[];
-//   user: User;
-//   createdAt: string;
-// };
 
 type Place = {
   id: string;
