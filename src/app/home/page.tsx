@@ -128,7 +128,8 @@ export default function HomePage() {
     <div className="max-w-2xl mx-auto md:px-4 py-8">
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-3 space-y-6">
-        <ScrollArea className="w-full whitespace-nowrap pb-4">
+
+        {/* <ScrollArea className="w-full whitespace-nowrap pb-4">
           <div className="flex gap-2">
             {CATEGORIES.map((category) => (
               <Button
@@ -143,7 +144,23 @@ export default function HomePage() {
               </Button>
             ))}
           </div>
+        </ScrollArea> */}
+              <ScrollArea className="w-full overflow-x-auto pb-4">
+          <div className="flex gap-2">
+            {CATEGORIES.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                onClick={() => setSelectedCategory(category)}
+                className="rounded-full whitespace-nowrap"
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
         </ScrollArea>
+
+
 
         <div className="grid gap-6">
         {processedPlaces?.map(

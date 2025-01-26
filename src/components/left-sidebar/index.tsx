@@ -80,13 +80,13 @@ export const LeftSidebar = () => {
           Budget Calculator
         </Link>
 
-        <Link
-          href="/transportation"
+        {/* <Link
+          href="/hotels"
           className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent"
         >
           <HotelIcon className="w-5 h-5" />
           Hotels
-        </Link>
+        </Link> */}
 
         {/* <Link
           href="/guide"
