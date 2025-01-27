@@ -117,7 +117,7 @@ export default function HomeLayout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="h-[calc(100vh-64px)] overflow-hidden"> {/* Adjust height based on navbar height */}
+    <div className="h-screen md:h-[calc(100vh-64px)] overflow-hidden"> {/* Adjust height based on navbar height */}
       <MobileNavigation
         trendingCities={trendingCities}
         upcomingEvents={upcomingEvents}
