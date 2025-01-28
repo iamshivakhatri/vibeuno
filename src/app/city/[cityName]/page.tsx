@@ -19,6 +19,7 @@ type Place = {
   name: string | null;
   caption: string | null;
   description: string | null;
+  city: string ;
   image: string[] | null;
   imageUrl: string | null;
   category: string | null;

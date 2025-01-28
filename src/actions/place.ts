@@ -8,40 +8,145 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation";
 
 import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
-import {Place as PlaceType} from "@/components/post/index.type";
 
 
 
 
+
+// export async function addPlace(formData: {
+//   name?: string;
+//   description: string;
+//   imageUrl: string;
+//   clerkId?: string;  // clerkId is received as input
+//   state: string;
+//   city: string;
+//   category: string;
+// }) {
+//   try {
+
+//     // Fetch user based on clerkId
+//     const user = await prisma.user.findUnique({
+//       where: { clerkId: formData.clerkId }
+//     });
+
+//     if (!user) {
+//       throw new Error("User not found for the provided clerkId");
+//     }
+
+//     // Remove clerkId from formData and add the userId to create the new place
+//     const newData = { ...formData, userId: user.id };
+//     delete newData.clerkId; // Optionally remove clerkId if it's in the formData
+
+
+//     // Create the place
+//     const place = await prisma.place.create({
+//       data: newData // Use the modified data with userId
+//     });
+
+//     return place;
+//   } catch (error) {
+//     console.error("Error adding place:", error);
+//     throw error;
+//   }
+// }
+
+
+export async function populateCities() {
+  try {
+    // Step 1: Retrieve all places that do not have a cityId
+    const placesWithoutCityId = await prisma.place.findMany({
+      where: {
+        cityId: null,  // Only fetch places where the cityId is not set
+      },
+    });
+
+    // Step 2: Loop through each place and ensure the city exists in the City table
+    for (const place of placesWithoutCityId) {
+      // Check if the city exists based on city, state, and country
+      const city = await prisma.city.upsert({
+        where: {
+          name_state_country: {
+            name: place.city,
+            state: place.state,
+            country: place.country || "Unknown", // Default to "Unknown" if no country is provided
+          },
+        },
+        create: {
+          name: place.city,
+          state: place.state,
+          country: place.country || "Unknown", // Default to "Unknown" if no country is provided
+          description: `Community for ${place.city}, ${place.state}`, // Optional: You can customize this
+          coverImage: `https://source.unsplash.com/featured/?${place.city}`, // Optional: You can customize this
+        },
+        update: {}, // Do nothing if the city already exists
+      });
+
+      // Step 3: Update the Place record with the cityId of the newly created or found city
+      await prisma.place.update({
+        where: { id: place.id },
+        data: { cityId: city.id }, // Set the cityId on the place record
+      });
+
+      console.log(`Place ${place.id} updated with city ${city.name} (${city.id})`);
+    }
+
+    console.log("Cities populated successfully for all places.");
+  } catch (error) {
+    console.error("Error populating cities:", error);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
 
 export async function addPlace(formData: {
   name?: string;
   description: string;
   imageUrl: string;
-  clerkId?: string;  // clerkId is received as input
+  clerkId?: string; // clerkId is received as input
   state: string;
   city: string;
   category: string;
 }) {
   try {
-
     // Fetch user based on clerkId
     const user = await prisma.user.findUnique({
-      where: { clerkId: formData.clerkId }
+      where: { clerkId: formData.clerkId },
     });
 
     if (!user) {
       throw new Error("User not found for the provided clerkId");
     }
 
-    // Remove clerkId from formData and add the userId to create the new place
-    const newData = { ...formData, userId: user.id };
-    delete newData.clerkId; // Optionally remove clerkId if it's in the formData
+    // Ensure the city exists or create it
+    const city = await prisma.city.upsert({
+      where: {
+        name_state_country: {
+          name: formData.city,
+          state: formData.state,
+          country: "USA", // Replace with dynamic country if needed
+        },
+      },
+      create: {
+        name: formData.city,
+        state: formData.state,
+        country: "USA", // Replace with dynamic country if needed
+        description: `Community for ${formData.city}, ${formData.state}`, // Optional: You can customize this
+        coverImage: `https://source.unsplash.com/featured/?${formData.city}`, // Optional: You can customize this
+      },
+      update: {}, // No updates needed, as `upsert` ensures it's created if missing
+    });
 
+    // Remove clerkId from formData and add the userId and cityId to create the new place
+    const newData = {
+      ...formData,
+      userId: user.id,
+      cityId: city.id, // Associate the place with the city's ID
+    };
+    delete newData.clerkId; // Optionally remove clerkId if it's in the formData
 
     // Create the place
     const place = await prisma.place.create({
-      data: newData // Use the modified data with userId
+      data: newData, // Use the modified data with userId and cityId
     });
 
     return place;
@@ -51,53 +156,6 @@ export async function addPlace(formData: {
   }
 }
 
-
-// export async function populateCities() {
-//   try {
-//     // Step 1: Retrieve all places that do not have a cityId
-//     const placesWithoutCityId = await prisma.place.findMany({
-//       where: {
-//         cityId: null,  // Only fetch places where the cityId is not set
-//       },
-//     });
-
-//     // Step 2: Loop through each place and ensure the city exists in the City table
-//     for (const place of placesWithoutCityId) {
-//       // Check if the city exists based on city, state, and country
-//       const city = await prisma.city.upsert({
-//         where: {
-//           name_state_country: {
-//             name: place.city,
-//             state: place.state,
-//             country: place.country || "Unknown", // Default to "Unknown" if no country is provided
-//           },
-//         },
-//         create: {
-//           name: place.city,
-//           state: place.state,
-//           country: place.country || "Unknown", // Default to "Unknown" if no country is provided
-//           description: `Community for ${place.city}, ${place.state}`, // Optional: You can customize this
-//           coverImage: `https://source.unsplash.com/featured/?${place.city}`, // Optional: You can customize this
-//         },
-//         update: {}, // Do nothing if the city already exists
-//       });
-
-//       // Step 3: Update the Place record with the cityId of the newly created or found city
-//       await prisma.place.update({
-//         where: { id: place.id },
-//         data: { cityId: city.id }, // Set the cityId on the place record
-//       });
-
-//       console.log(`Place ${place.id} updated with city ${city.name} (${city.id})`);
-//     }
-
-//     console.log("Cities populated successfully for all places.");
-//   } catch (error) {
-//     console.error("Error populating cities:", error);
-//   } finally {
-//     await prisma.$disconnect();
-//   }
-// }
 
 export async function getCityData(name: string) {
 
@@ -126,6 +184,7 @@ export async function getCityData(name: string) {
             description: true,
             imageUrl: true,
             image: true,
+            city: true,
             category: true,
             numVotes: true,
             createdAt: true,
@@ -913,6 +972,7 @@ export async function getPost() {
         description: true,
         imageUrl: true,
         image: true, // Ensure this is an array of strings
+        city: true,
         category: true,
         numVotes: true,
         createdAt: true,

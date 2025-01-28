@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { populateCities } from "@/actions/place";
 
 type Place = {
   id: string;
@@ -357,7 +358,7 @@ export default function Home() {
               <p className="text-muted-foreground mb-4">
                 Found an amazing place? Share it with the community!
               </p>
-              <Button className="w-full">
+              <Button className="w-full" onClick={()=> populateCities()}>
                 Share a Place
               </Button>
             </div>

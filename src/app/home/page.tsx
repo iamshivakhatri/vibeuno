@@ -31,6 +31,7 @@ type Place = {
   caption: string | null;
   description: string | null;
   image: string[] | null;
+  city: string;
   imageUrl: string | null;
   category: string | null;
   numVotes: number;
