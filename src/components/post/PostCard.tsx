@@ -115,11 +115,6 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
     enabled: Boolean(place.id),
   });
   
-  
-
-    console.log("all comments", allComments);
-    console.log("comments before", place.comments);
-
 
 
 
