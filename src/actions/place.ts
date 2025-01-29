@@ -1157,3 +1157,80 @@ export async function getAllCityName(){
 
   return cities
 }
+
+
+
+type Comment = {
+  id: string;
+  content: string;
+  user: {
+    id: string;
+    name: string;
+    profileUrl: string | null;
+    occupation: string | null;
+  };
+  userId: string;
+  placeId: string;
+  createdAt: Date;
+  editedAt: Date | null;
+  isEdited: boolean;
+  likes: number;
+  reported: boolean;
+  parentId: string | null;
+  visible: boolean;
+};
+
+// server.ts
+export async function getCommentsByPlaceId(placeId: string): Promise<Comment[]> {
+  try {
+    const comments = await prisma.comment.findMany({
+      where: { 
+        placeId, 
+        visible: true 
+      },
+      orderBy: { 
+        createdAt: 'desc' 
+      },
+      select: {
+        id: true,
+        content: true,
+        userId: true,
+        placeId: true,
+        createdAt: true,
+        editedAt: true,
+        isEdited: true,
+        reported: true,
+        parentId: true,
+        visible: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profileUrl: true,
+            occupation: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true
+          }
+        }
+      },
+    });
+
+    // Transform the response to match the Comment type
+    return comments.map(comment => ({
+      ...comment,
+      likes: comment._count.likes,
+      user: {
+        id: comment.user.id,
+        name: comment.user.name || '',
+        profileUrl: comment.user.profileUrl,
+        occupation: comment.user.occupation,
+      }
+    }));
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    throw new Error('Failed to fetch comments');
+  }
+}

@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useQuery } from "@tanstack/react-query";
 import { hasUserVotedForPlace, getPlaceVoteCount } from "@/actions/user";
 import { Badge } from "@/components/ui/badge";
-import { createComment } from "@/actions/place";
+import { createComment, getCommentsByPlaceId } from "@/actions/place";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteComment } from "@/actions/place";
 import { useMutationData, useMutationDataState } from "@/hooks/useMutationData";
@@ -75,6 +75,10 @@ type Comment = {
   parentId: string | null;
   visible: boolean;
 };
+
+
+
+
 type PostCardProps = {
   place: Place;
   profileUrl: string | null | undefined;
@@ -102,8 +106,22 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
   const { mutate: handleLike } = useMutationData(
     ["add-comment"],
     (commentId) => toggleCommentLike({ userId, commentId }), // Use userId from this scope
-    "placesFromCity"
+    "all-comments"
   );
+
+  const { data: allComments } = useQuery<Comment[]>({
+    queryKey: ["all-comments"],
+    queryFn:  () => getCommentsByPlaceId(place.id),
+    enabled: Boolean(place.id),
+  });
+  
+  
+
+    console.log("all comments", allComments);
+    console.log("comments before", place.comments);
+
+
+
 
   //   const handleLike = (commentId: string) => {
   //   }
@@ -117,7 +135,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
         placeId: string;
         parentId?: string;
       }) => createComment(newComment),
-      "placesFromCity",
+      "all-comments",
       () => setNewComment("")
     );
 
@@ -127,7 +145,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
     useMutationData(
       ["delete-comment"],
       (commentId: string) => deleteComment(commentId),
-      "placesFromCity"
+      "all-comments",
     );
 
   const handleComment = (
@@ -233,7 +251,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
   return (
     <div
       key={place.id}
-      className="bg-card rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+      className="overflow-hidden  shadow-sm transition-shadow"
     >
       {/* User Info */}
       <div className="p-4 flex items-center gap-3 border-b">
@@ -312,7 +330,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
           </Button>
           <Button variant="ghost" size="sm" className="gap-2">
             <MessageSquare className="w-4 h-4" />
-            <span>{place.comments.length}</span>
+            <span>{allComments?.length || 0}</span>
           </Button>
           <Button
             variant="ghost"
@@ -325,7 +343,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
         </div>
 
         <CommentSection
-          place={{ id: place.id, comments: place.comments }}
+          place={{ id: place.id, comments: allComments || [] }}
           profileUrl={profileUrl}
           handleComment={handleComment}
           mutateDelete={mutateDelete}

@@ -58,7 +58,7 @@ export function Comment({ comment, handleReply, handleLike, mutateDelete, isMini
               <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
                 <button className="hover:text-foreground flex items-center gap-1" onClick={handleLike}>
                   <ThumbsUp className="h-3 w-3" />
-                  <span>{Array.isArray(comment.likes) ? comment.likes.length : 0}</span>
+                  <span>{comment.likes ? comment.likes : 0}</span>
                 </button>
                 <button className="hover:text-foreground" onClick={() => setShowReplyForm(!showReplyForm)}>
                   Reply
