@@ -121,21 +121,20 @@ export default function HomePage() {
     selectedCategory === "All"
       ? processedPlaces 
       : (processedPlaces ?? []).filter(
-          (place) => place.category === selectedCategory
+          (place) => place.category === selectedCategory.toLowerCase()
         );
+
+  console.log("this is the selected category", selectedCategory);
 
   
   return (
   
-    <div className="max-w-2xl mx-auto md:px-4 py-8">
+    <div className="max-w-2xl mx-auto md:px-4 mb-8">
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-3 space-y-6">
 
-
-
-
           <ScrollArea className="w-full whitespace-nowrap rounded-md overflow-x-hidden">
-            <div className="flex w-max space-x-4 p-4">
+            <div className="flex w-max space-x-4 ">
               {CATEGORIES.map((category) => (
                 <Button
                   key={category}
@@ -153,7 +152,7 @@ export default function HomePage() {
 
 
 
-        <div className="grid gap-6">
+        <div className="grid gap-6 ">
         {filteredPlaces?.map(
           (place) =>
             profileData?.profileUrl &&

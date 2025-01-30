@@ -36,7 +36,7 @@ export default function HomeLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Main Content */}
-        <main className="overflow-y-auto h-full">
+        <main className="overflow-y-auto h-full pb-12">
           {children}
         </main>
 
