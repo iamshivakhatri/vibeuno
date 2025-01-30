@@ -129,7 +129,7 @@ export default function CityPage() {
   const filteredPlaces =
     selectedCategory === "All"
       ? places
-      : places.filter((place) => place.category === selectedCategory);
+      : places.filter((place) => place.category === selectedCategory.toLowerCase());
 
   return (
     <div className="min-h-screen bg-background">
