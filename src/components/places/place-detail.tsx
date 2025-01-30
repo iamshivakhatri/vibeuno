@@ -15,7 +15,7 @@ import { Card } from '@/components/ui/card';
 
 import { deletePlace, deleteImage, updateDescription } from '@/actions/place'
 import { toast } from "@/hooks/use-toast";
-import {MoreVertical,  Trash2, Upload, X,  Camera, Heart, MapPin, MoreHorizontal, Share2, Grid, ChevronLeft} from 'lucide-react'; // Import icons
+import {MoreVertical,  Trash2, Upload, X,  Camera, Heart, MapPin, MoreHorizontal, Share2, Grid, ChevronLeft, GalleryHorizontal} from 'lucide-react'; // Import icons
 import { PhotoUpload } from '../explore/photo-upload';
 import { PhotoUpdate } from './photo-update';
 import { set } from 'date-fns';
@@ -320,7 +320,7 @@ export function PlaceDetail({
           onClick={() => setViewMode('list')}
           className={`flex-1 ${viewMode === 'list' ? 'border-b-2 border-black' : ''}`}
         >
-          <Camera className="h-5 w-5" />
+          <GalleryHorizontal className="h-5 w-5" />
         </Button>
       </div>
 

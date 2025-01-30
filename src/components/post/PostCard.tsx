@@ -34,6 +34,7 @@ import { ImageCarousel } from "./ImageCarousel";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { isPlaceInWishlist } from "@/actions/place";
 
 type Place = {
   id: string;
@@ -105,6 +106,15 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
   const queryClient = useQueryClient();
 
   const router = useRouter();
+
+  const {data: hasUserBookMarked} = useQuery({
+    queryKey: ["wishlistStatus", place.id, userId],
+    queryFn: async () => {
+      if (!place.id || !userId) return false;
+      return await isPlaceInWishlist(place.id, userId);
+    },
+    enabled: !!place.id && !!userId, // Prevents execution if values are missing
+  });
 
 
 
@@ -189,7 +199,8 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
 
   const { mutate: handleBookmark } = useMutationData(
     ["handle-bookmark"],
-    (placeId: string) => bookMarkPlace({ placeId, userId })
+    (placeId: string) => bookMarkPlace({ placeId, userId }),
+    ["wishlistStatus", place.id, userId]
   );
 
   const { mutate: addOrRemoveVote } = useMutation({
@@ -342,7 +353,14 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
             className="ml-auto"
             onClick={() => handleBookmark(place.id)}
           >
-            <Bookmark className="w-4 h-4" />
+            {/* <Bookmark className="w-4 h-4" /> */}
+            <Bookmark
+              className={`h-4 w-4 ${
+                hasUserBookMarked ? "fill-primary text-primary" : ""
+              }`}
+            />
+
+
           </Button>
         </div>
 

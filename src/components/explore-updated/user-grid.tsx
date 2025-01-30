@@ -15,7 +15,7 @@ export default function UsersGrid() {
   console.log("This is the users.",users)
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-8 py-8">
       <div className="mb-8">
         <h2 className="text-3xl font-bold mb-2">Popular Travelers</h2>
         <p className="text-muted-foreground">Connect with experienced travelers</p>

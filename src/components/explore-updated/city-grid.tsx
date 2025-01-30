@@ -16,7 +16,7 @@ export default function CitiesGrid() {
 
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-8 py-8">
       <div className="mb-8">
         <h2 className="text-3xl font-bold mb-2">Popular Cities</h2>
         <p className="text-muted-foreground">Explore the world&apos;s most vibrant destinations</p>

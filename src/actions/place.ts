@@ -278,6 +278,7 @@ type Place = {
 };
 
 export async function getUserPlaces(userId: string): Promise<Place[]> {
+  // userId is actual userid
   try {
     // Fetch the visited places associated with the given userId
     const places = await prisma.place.findMany({
@@ -1190,5 +1191,75 @@ export async function getCommentsByPlaceId(placeId: string, userId: string): Pro
   } catch (error) {
     console.error('Error fetching comments:', error);
     throw new Error('Failed to fetch comments');
+  }
+}
+
+
+
+export async function isPlaceInWishlist(placeId: string, userId: string): Promise<boolean> {
+  if (!placeId || !userId) throw new Error("Missing placeId or userId");
+
+  const wishlistItem = await prisma.wishlistItem.findUnique({
+    where: {
+      placeId_userId: { placeId, userId }, // Uses the unique constraint
+    },
+  });
+
+  return !!wishlistItem;
+}
+
+
+
+export async function getPostUser(userId: string) {
+  if (!userId) throw new Error("User ID is required");
+
+  try {
+    const places = await prisma.place.findMany({
+      where: {
+        userId: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        caption: true,
+        description: true,
+        imageUrl: true,
+        image: true,
+        city: true,
+        category: true,
+        numVotes: true,
+        createdAt: true,
+        comments: {
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            likes: true,
+            parentId: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profileUrl: true,
+                occupation: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profileUrl: true,
+            occupation: true,
+          },
+        },
+      },
+    });
+
+    return places;
+  } catch (error) {
+    console.error("Error fetching places:", error);
+    throw new Error("Failed to fetch places");
   }
 }

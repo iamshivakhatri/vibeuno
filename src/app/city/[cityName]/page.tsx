@@ -14,7 +14,7 @@ import PostCard from "@/components/post/PostCard";
 import { getProfileFromClerk } from "@/actions/user";
 import { useQueryData } from "@/hooks/useQueryData";
 
-type Place = {
+export type Place = {
   id: string;
   name: string | null;
   caption: string | null;
@@ -56,7 +56,7 @@ type Comment = {
   visible: boolean;
 };
 
-type placesDataProps = {
+export type placesDataProps = {
   id: string; // Unique identifier for the country
   name: string; // Name of the country or city (e.g., "dallas")
   description: string; // Brief description (e.g., "Community for dallas, Texas")
