@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { getCityData } from "@/actions/place";
 import { useUser } from "@clerk/nextjs";
@@ -19,7 +19,7 @@ export type Place = {
   name: string | null;
   caption: string | null;
   description: string | null;
-  city: string ;
+  city: string;
   image: string[] | null;
   imageUrl: string | null;
   category: string | null;
@@ -71,6 +71,7 @@ export type placesDataProps = {
 };
 const CATEGORIES = [
   "All",
+  "Nature",
   "Restaurants",
   "Parks",
   "Museums",
@@ -165,8 +166,8 @@ export default function CityPage() {
       <div className="max-w-2xl mx-auto md:px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-3 space-y-6">
-            <ScrollArea className="w-full whitespace-nowrap pb-4">
-              <div className="flex gap-2">
+            <ScrollArea className="w-full whitespace-nowrap rounded-md overflow-x-hidden">
+              <div className="flex w-max space-x-4 p-4">
                 {CATEGORIES.map((category) => (
                   <Button
                     key={category}
@@ -174,12 +175,13 @@ export default function CityPage() {
                       selectedCategory === category ? "default" : "outline"
                     }
                     onClick={() => setSelectedCategory(category)}
-                    className="rounded-full"
+                    className="rounded-full whitespace-nowrap"
                   >
                     {category}
                   </Button>
                 ))}
               </div>
+              <ScrollBar orientation="horizontal" />
             </ScrollArea>
 
             <div className="grid gap-6">
@@ -197,12 +199,9 @@ export default function CityPage() {
                   )
               )}
             </div>
-
           </div>
         </div>
       </div>
-
-
     </div>
   );
 }

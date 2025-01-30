@@ -8,7 +8,7 @@ import { PhotoUpload } from "@/components/explore/photo-upload";
 import { getSearchSuggestions } from "@/lib/explore/search-suggestions";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 
 import {
   Select,
@@ -32,23 +32,35 @@ export default function UploadPage() {
 
   const router = useRouter();
 
-  const { data: userId, isLoading, error } = useQuery({
-    queryKey: ['userId'],
-    queryFn: async () =>  getAppUserId(user?.id ?? ''),
+  const {
+    data: userId,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["userId"],
+    queryFn: async () => getAppUserId(user?.id ?? ""),
   });
 
-
-  
-
+  const CATEGORIES = [
+    "All",
+    "Nature",
+    "Restaurants",
+    "Parks",
+    "Museums",
+    "Nightlife",
+    "Shopping",
+    "Architecture",
+    "Hidden Gems",
+  ];
 
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchQuery.length >= 2) {
         try {
-        const suggestions = await getSearchSuggestions(searchQuery);
-        setSuggestions(suggestions);
-        }catch(error){
-          console.error('Error fetching suggestions:', error);
+          const suggestions = await getSearchSuggestions(searchQuery);
+          setSuggestions(suggestions);
+        } catch (error) {
+          console.error("Error fetching suggestions:", error);
         }
       } else {
         setSuggestions([]);
@@ -61,7 +73,7 @@ export default function UploadPage() {
   const handleUploadComplete = (urls: string[]) => {
     console.log("Uploaded photos:", urls);
     setSearchQuery("");
-    if(userId){
+    if (userId) {
       router.push(`/profile/${userId}`);
     }
   };
@@ -120,11 +132,12 @@ export default function UploadPage() {
                 <SelectValue placeholder="Select a category (Optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="nature">Nature</SelectItem>
-                <SelectItem value="culture">Culture</SelectItem>
-                <SelectItem value="food">Food</SelectItem>
-                <SelectItem value="entertainment">Entertainment</SelectItem>
-              </SelectContent>
+  {CATEGORIES.map((category) => (
+    <SelectItem key={category} value={category.toLowerCase().replace(" ", "-")}>
+      {category}
+    </SelectItem>
+  ))}
+</SelectContent>
             </Select>
           </div>
 
@@ -138,7 +151,6 @@ export default function UploadPage() {
               }
             />
           </div>
-
 
           {/* Photo Upload */}
           <div className="border-t pt-6">
