@@ -35,7 +35,6 @@ export function CommentDialog({
   handleLike,
   isCurrentUser,
 }: CommentDialogProps) {
-    
   const [newComment, setNewComment] = useState("")
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
 
@@ -51,27 +50,6 @@ export function CommentDialog({
     }
   }
 
-  // Group comments by parent
-  const commentThreads = place.comments.reduce(
-    (acc, comment) => {
-      if (!comment.parentId) {
-        acc[comment.id] = {
-          parent: comment,
-          replies: [],
-        }
-      }
-      return acc
-    },
-    {} as Record<string, { parent: CommentType; replies: CommentType[] }>,
-  )
-
-  // Add replies to their parent threads
-  place.comments.forEach((comment) => {
-    if (comment.parentId && commentThreads[comment.parentId]) {
-      commentThreads[comment.parentId].replies.push(comment)
-    }
-  })
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[512px] p-0">
@@ -79,15 +57,14 @@ export function CommentDialog({
           <div className="p-4 border-b">
             <h2 className="text-lg font-semibold">Comments</h2>
           </div>
-
           <ScrollArea className="flex-1 p-4">
-            {Object.values(commentThreads).map(({ parent, replies }) => (
-              <div key={parent.id} className="mb-6">
+            {place.comments.map((comment) => (
+              <div key={comment.id} className="mb-6">
                 <div className="flex items-start gap-3">
                   <Avatar className="h-8 w-8">
                     <Image
-                      src={parent.user.profileUrl || "/placeholder.svg"}
-                      alt={parent.user.name || "User"}
+                      src={comment.user.profileUrl || "/placeholder.svg"}
+                      alt={comment.user.name || "User"}
                       width={32}
                       height={32}
                     />
@@ -95,106 +72,38 @@ export function CommentDialog({
                   <div className="flex-1 space-y-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <span className="font-semibold text-sm">{parent.user.name}</span>
-                        <p className="text-sm">{parent.content}</p>
+                        <span className="font-semibold text-sm">{comment.user.name}</span>
+                        <p className="text-sm">{comment.content}</p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {isCurrentUser && parent.user.id === "current-user" && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-red-500"
-                            onClick={() => mutateDelete(parent.id)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                      {isCurrentUser && comment.user.id === "current-user" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                          onClick={() => mutateDelete(comment.id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span>{new Date(parent.createdAt).toLocaleDateString()}</span>
+                      <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                       <button
-                        className="hover:text-foreground flex items-center gap-1"
-                        onClick={() => handleLike(parent.id)}
+                        className={`hover:text-foreground flex items-center gap-1 ${comment.hasUserLiked ? "text-red-500" : "text-muted-foreground"}`}
+                        onClick={() => handleLike(comment.id)}
                       >
-                        <Heart className="h-3 w-3" /> {parent.likes}
+                        <Heart className="h-3 w-3" fill={comment.hasUserLiked ? "red" : "none"} /> {comment.likes}
                       </button>
-                      <button className="hover:text-foreground" onClick={() => handleReply(parent.id)}>
+                      <button className="hover:text-foreground" onClick={() => handleReply(comment.id)}>
                         Reply
                       </button>
                     </div>
                   </div>
                 </div>
-
-                {/* Replies */}
-                {replies.length > 0 && (
-                  <div className="ml-11 mt-4 space-y-4">
-                    {replies.map((reply) => (
-                      <div key={reply.id} className="flex items-start gap-3">
-                        <Avatar className="h-6 w-6">
-                          <Image
-                            src={reply.user.profileUrl || "/placeholder.svg"}
-                            alt={reply.user.name || "User"}
-                            width={24}
-                            height={24}
-                          />
-                        </Avatar>
-                        <div className="flex-1 space-y-1">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <span className="font-semibold text-sm">{reply.user.name}</span>
-                              <p className="text-sm">{reply.content}</p>
-                            </div>
-                            {isCurrentUser && reply.user.id === "current-user" && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-muted-foreground hover:text-red-500"
-                                onClick={() => mutateDelete(reply.id)}
-                              >
-                                <Trash className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>{new Date(reply.createdAt).toLocaleDateString()}</span>
-                            <button
-                              className="hover:text-foreground flex items-center gap-1"
-                              onClick={() => handleLike(reply.id)}
-                            >
-                              <Heart className="h-3 w-3" /> {reply.likes}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {replyingTo === parent.id && (
-                  <div className="ml-11 mt-4 flex gap-2">
-                    <Avatar className="h-6 w-6">
-                      <Image src={profileUrl || "/placeholder.svg"} alt="Your avatar" width={24} height={24} />
-                    </Avatar>
-                    <div className="flex-1 flex gap-2">
-                      <Textarea
-                        placeholder={`Reply to ${parent.user.name}...`}
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        className="min-h-0 h-9 py-2 resize-none text-sm"
-                      />
-                      <Button size="sm" onClick={submitReply} disabled={!newComment.trim()}>
-                        Reply
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
                 <Separator className="my-4" />
               </div>
             )).reverse()}
           </ScrollArea>
-
           <div className="p-4 border-t">
             <div className="flex gap-3 items-center">
               <Avatar className="h-8 w-8">

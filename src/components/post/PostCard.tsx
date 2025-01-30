@@ -111,7 +111,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
 
   const { data: allComments } = useQuery<Comment[]>({
     queryKey: ["all-comments", place.id, userId],
-    queryFn: () => getCommentsByPlaceId(place.id),
+    queryFn: () => getCommentsByPlaceId(place.id, userId),
     enabled: !!place.id && !!userId,
   });
 

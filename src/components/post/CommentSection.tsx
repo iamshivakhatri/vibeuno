@@ -221,6 +221,7 @@ export type CommentType = {
   reported: boolean
   parentId: string | null
   visible: boolean
+  hasUserLiked?: boolean
 }
 
 export function CommentSection({ place, profileUrl, handleComment, mutateDelete, handleLike, isCurrentUser }: CommentSectionProps) {
@@ -251,7 +252,7 @@ export function CommentSection({ place, profileUrl, handleComment, mutateDelete,
               <span className="text-sm text-muted-foreground">{comment.content}</span>
             </div>
           ))}
-          {place.comments.length > 2 && (
+          {place.comments.length > 0 && (
             <button
               onClick={() => setIsDialogOpen(true)}
               className="text-sm text-muted-foreground hover:text-foreground"
@@ -260,7 +261,15 @@ export function CommentSection({ place, profileUrl, handleComment, mutateDelete,
             </button>
           )}
         </div>
-      )}
+      )} 
+
+          {/* <button
+              onClick={() => setIsDialogOpen(true)}
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              View all {place.comments.length} comments
+            </button> */}
+
 
       {/* Quick Comment Input */}
       <div className="flex gap-3 items-center">

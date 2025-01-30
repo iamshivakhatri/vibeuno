@@ -907,58 +907,6 @@ export async function getCities() {
   }
 }
 
-// export async function getPost() {
-//   try {
-//     const places = await prisma.place.findMany({
-//       select: {
-//         id: true,
-//         name: true,
-//         caption: true,
-//         description: true,
-//         imageUrl: true,
-//         image: true,
-//         category: true,
-//         numVotes: true,
-//         createdAt: true,
-//         comments: {
-//           select: {
-//             id: true,
-//             content: true,
-//             createdAt: true,
-//             likes: true,
-//             parentId: true,
-//             user: {
-//               select: {
-//                 id: true,
-//                 name: true,
-//                 profileUrl: true,
-//                 occupation: true,
-//               },
-//             },
-//           },
-//         },
-//         user: {
-//           select: {
-//             id: true,
-//             name: true,
-//             profileUrl: true,
-//             occupation: true,
-//           },
-//         },
-//       },
-//       orderBy: {
-//         createdAt: 'desc',
-//       },
-//       take: 50,
-//     });
-
-//      return places;
-
-//   } catch (error) {
-//     console.error("Error fetching places:", error);
-//     return [];
-//   }
-// }
 
 
 
@@ -1181,7 +1129,7 @@ type Comment = {
 };
 
 // server.ts
-export async function getCommentsByPlaceId(placeId: string): Promise<Comment[]> {
+export async function getCommentsByPlaceId(placeId: string, userId: string): Promise<Comment[]> {
   try {
     const comments = await prisma.comment.findMany({
       where: { 
@@ -1210,6 +1158,11 @@ export async function getCommentsByPlaceId(placeId: string): Promise<Comment[]> 
             occupation: true,
           },
         },
+        likes: {
+          select: {
+            userId: true,  // Fetch the list of users who liked this comment
+          },
+        },
         _count: {
           select: {
             likes: true
@@ -1225,6 +1178,7 @@ export async function getCommentsByPlaceId(placeId: string): Promise<Comment[]> 
     return comments.map(comment => ({
       ...comment,
       likes: comment._count.likes,
+      hasUserLiked: comment.likes.some(like => like.userId === userId), // Check if the logged-in user has liked the comment      
       user: {
         id: comment.user.id,
         name: comment.user.name || '',
