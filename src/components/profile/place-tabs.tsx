@@ -135,7 +135,7 @@ const { data: profileData } = useQuery({
 
       <TabsContent value="posts">
 
-        <div className='grid grid-cols-1 w-1/2 m-auto'>
+        <div className='grid grid-cols-1 w-full md:w-[600px] lg:w-[720px] m-auto'>
         {placesData?.map(
                 (place) =>
                   profileData?.profileUrl &&
