@@ -1218,6 +1218,9 @@ export async function getCommentsByPlaceId(placeId: string): Promise<Comment[]> 
       },
     });
 
+    console.log('Comments at here:', comments);
+
+
     // Transform the response to match the Comment type
     return comments.map(comment => ({
       ...comment,
@@ -1229,6 +1232,7 @@ export async function getCommentsByPlaceId(placeId: string): Promise<Comment[]> 
         occupation: comment.user.occupation,
       }
     }));
+
   } catch (error) {
     console.error('Error fetching comments:', error);
     throw new Error('Failed to fetch comments');

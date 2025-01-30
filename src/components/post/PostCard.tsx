@@ -33,6 +33,7 @@ import { CommentSection } from "./CommentSection";
 import { ImageCarousel } from "./ImageCarousel";
 import { JsonValue } from "@prisma/client/runtime/library";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
 type Place = {
   id: string;
@@ -97,50 +98,57 @@ type PostCardProps = {
 // };
 
 const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
+  console.log("this is the user", userId, place.user.id);
+  const isCurrentUser = userId === place.user.id;
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [newComment, setNewComment] = useState("");
   const queryClient = useQueryClient();
 
   const router = useRouter();
 
-  const { mutate: handleLike } = useMutationData(
-    ["add-comment"],
-    (commentId) => toggleCommentLike({ userId, commentId }), // Use userId from this scope
-    "all-comments"
-  );
+
+
 
   const { data: allComments } = useQuery<Comment[]>({
-    queryKey: ["all-comments"],
-    queryFn:  () => getCommentsByPlaceId(place.id),
-    enabled: Boolean(place.id),
+    queryKey: ["all-comments", place.id, userId],
+    queryFn: () => getCommentsByPlaceId(place.id),
+    enabled: !!place.id && !!userId,
   });
+
+
   
 
 
 
-  //   const handleLike = (commentId: string) => {
-  //   }
+
+    // Optimize mutations with better error handling
+    const { mutate: handleLike } = useMutationData(
+      ["toggle-like", place.id], // Changed key to be more specific
+      (commentId: string) => toggleCommentLike({ userId, commentId }),
+      ["all-comments", place.id, userId]
+    );
+  
+
 
   const { mutate: addComment, isPending: isAddingCommentPending } =
     useMutationData(
-      ["add-comment"],
+      ["add-comment", place.id],
       (newComment: {
         content: string;
         userId: string;
         placeId: string;
         parentId?: string;
       }) => createComment(newComment),
-      "all-comments",
+      ["all-comments", place.id, userId],
       () => setNewComment("")
     );
 
-  //   const {latestVariables} = useMutationDataState(['handle-vote']) // for optimistic ui
 
   const { mutate: mutateDelete, isPending: isDeletingCommentPending } =
     useMutationData(
-      ["delete-comment"],
+      ["delete-comment", place.id],
       (commentId: string) => deleteComment(commentId),
-      "all-comments",
+      ["all-comments", place.id, userId],
     );
 
   const handleComment = (
@@ -307,6 +315,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
       <div className="p-4">
         <h3 className="text-xl font-semibold mb-2">{place.name}</h3>
         <p className="text-muted-foreground mb-4">{place.description}</p>
+        <p>{isCurrentUser}</p>
 
         {/* Interactions */}
         <div className="flex items-center gap-4 text-muted-foreground mb-4">
@@ -343,6 +352,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
           handleComment={handleComment}
           mutateDelete={mutateDelete}
           handleLike={handleLike}
+          isCurrentUser={isCurrentUser}
         />
       </div>
     </div>

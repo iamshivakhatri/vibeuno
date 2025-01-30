@@ -15,9 +15,10 @@ interface CommentProps {
   mutateDelete: () => void
   isMinimized: boolean
   toggleMinimize: () => void
+  isCurrentUser: boolean
 }
 
-export function Comment({ comment, handleReply, handleLike, mutateDelete, isMinimized, toggleMinimize }: CommentProps) {
+export function Comment({ comment, handleReply, handleLike, mutateDelete, isMinimized, toggleMinimize, isCurrentUser }: CommentProps) {
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [replyContent, setReplyContent] = useState("")
 
@@ -64,13 +65,16 @@ export function Comment({ comment, handleReply, handleLike, mutateDelete, isMini
                   Reply
                 </button>
                 <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
-                <button
-                  className="text-red-500 hover:text-red-700 ml-auto"
-                  onClick={mutateDelete}
-                  aria-label="Delete comment"
-                >
-                  <Trash className="h-3 w-3" />
-                </button>
+                {isCurrentUser && (
+                   <button
+                   className="text-red-500 hover:text-red-700 ml-auto"
+                   onClick={mutateDelete}
+                   aria-label="Delete comment"
+                 >
+                   <Trash className="h-3 w-3" />
+                 </button>
+                )}
+               
               </div>
 
               {!isMinimized && (
