@@ -119,26 +119,25 @@ export default function HomePage() {
   // Filter places based on selectedCategory
   const filteredPlaces =
     selectedCategory === "All"
-      ? processedPlaces 
+      ? processedPlaces
       : (processedPlaces ?? []).filter(
           (place) => place.category === selectedCategory.toLowerCase()
         );
 
   console.log("this is the selected category", selectedCategory);
 
-  
   return (
-  
     <div className="max-w-2xl mx-auto md:px-4 mb-8">
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-3 space-y-6">
-
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-3 space-y-6">
           <ScrollArea className="w-full whitespace-nowrap rounded-md overflow-x-hidden">
-            <div className="flex w-max space-x-4 ">
+            <div className="flex w-max space-x-4 p-4">
               {CATEGORIES.map((category) => (
                 <Button
                   key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  variant={
+                    selectedCategory === category ? "default" : "outline"
+                  }
                   onClick={() => setSelectedCategory(category)}
                   className="rounded-full whitespace-nowrap"
                 >
@@ -149,28 +148,23 @@ export default function HomePage() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-
-
-
-        <div className="grid gap-6 ">
-        {filteredPlaces?.map(
-          (place) =>
-            profileData?.profileUrl &&
-            profileData?.userId && (
-              <PostCard
-                key={place.id}
-                place={place}
-                profileUrl={profileData.profileUrl}
-                clerkId={user?.id}
-                userId={profileData.userId}
-              />
-            )
-        )}
-      </div>
-
-
+          <div className="grid gap-6 ">
+            {filteredPlaces?.map(
+              (place) =>
+                profileData?.profileUrl &&
+                profileData?.userId && (
+                  <PostCard
+                    key={place.id}
+                    place={place}
+                    profileUrl={profileData.profileUrl}
+                    clerkId={user?.id}
+                    userId={profileData.userId}
+                  />
+                )
+            )}
+          </div>
+        </div>
       </div>
     </div>
-  </div>
   );
 }
