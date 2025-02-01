@@ -87,7 +87,6 @@ export async function populateCities() {
         data: { cityId: city.id }, // Set the cityId on the place record
       });
 
-      console.log(`Place ${place.id} updated with city ${city.name} (${city.id})`);
     }
 
     console.log("Cities populated successfully for all places.");
@@ -698,6 +697,19 @@ export async function deletePlace(placeId: string, userId: string) {
       },
     });
 
+    await prisma.like.deleteMany({
+      where: {
+        comment: {
+          placeId: placeId
+        }
+      }
+    });
+
+    await prisma.comment.deleteMany({
+      where: { placeId: placeId }
+    });
+    
+
     await prisma.place.delete({
       where: {
         id: placeId,
@@ -1065,6 +1077,7 @@ interface bookMarkPlaceProps {
 
 
 export async function bookMarkPlace({placeId, userId}: bookMarkPlaceProps){
+
   try{
     const existingBookmark = await prisma.wishlistItem.findFirst({
       where: {
@@ -1172,7 +1185,6 @@ export async function getCommentsByPlaceId(placeId: string, userId: string): Pro
       },
     });
 
-    console.log('Comments at here:', comments);
 
 
     // Transform the response to match the Comment type

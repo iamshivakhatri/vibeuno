@@ -14,12 +14,15 @@ import {updatePlaceDetails} from "@/actions/place"
 import { Card } from '@/components/ui/card';
 
 import { deletePlace, deleteImage, updateDescription } from '@/actions/place'
-import { toast } from "@/hooks/use-toast";
-import {MoreVertical,  Trash2, Upload, X,  Camera, Heart, MapPin, MoreHorizontal, Share2, Grid, ChevronLeft, GalleryHorizontal} from 'lucide-react'; // Import icons
+import { toast } from "sonner";
+import {MoreVertical,  Trash2, Upload, X,  Camera, Heart, MapPin, MoreHorizontal, Share2, Grid, ChevronLeft, GalleryHorizontal, ChevronRight, Bookmark} from 'lucide-react'; // Import icons
 import { PhotoUpload } from '../explore/photo-upload';
 import { PhotoUpdate } from './photo-update';
 import { set } from 'date-fns';
 import { Input } from '@/components/ui/input';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { bookMarkPlace, isPlaceInWishlist } from "@/actions/place";
+import { log } from 'console';
 
 
 
@@ -41,6 +44,7 @@ interface PlaceDetailProps {
   }>;
   userId: string;
   isCurrentUser: boolean;
+  loggedinUserId: string;
 }
 
 
@@ -49,6 +53,7 @@ export function PlaceDetail({
   visitors, 
   userId, 
   isCurrentUser, 
+  loggedinUserId
 }: PlaceDetailProps) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
@@ -62,6 +67,61 @@ export function PlaceDetail({
   const [optimisticPlace, setOptimisticPlace] = useState(place);
   const [editedName, setEditedName] = useState(place?.name || '');
 
+  const queryClient = useQueryClient();
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+
+ 
+
+
+    const {data: hasUserBookMarked} = useQuery({
+      queryKey: ["wishlistStatus", place.id, loggedinUserId],
+      queryFn: async () => {
+        if (!place.id || !userId) return false;
+        return await isPlaceInWishlist(place.id, loggedinUserId);
+      },
+      enabled: !!place.id && !!loggedinUserId,
+      staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    });
+
+    console.log('hasUserBookMarked:', hasUserBookMarked)
+
+      const { mutate: handleBookmark } = useMutation({
+        mutationFn: (placeId: string) => bookMarkPlace({ placeId, userId:loggedinUserId }),
+        onMutate: async (placeId) => {
+          await queryClient.cancelQueries({
+            queryKey: ["wishlistStatus", placeId, loggedinUserId],
+          });
+    
+          const previousStatus = queryClient.getQueryData([
+            "wishlistStatus",
+            placeId,
+            loggedinUserId,
+          ]);
+    
+          // Optimistically update
+          queryClient.setQueryData(
+            ["wishlistStatus", placeId, loggedinUserId],
+            !previousStatus
+          );
+    
+          return { previousStatus };
+        },
+        onError: (err, placeId, context) => {
+          queryClient.setQueryData(
+            ["wishlistStatus", placeId, loggedinUserId],
+            context?.previousStatus
+          );
+          toast.error("Failed to update bookmark status");
+        },
+        onSuccess: () => {
+          toast.success(
+            hasUserBookMarked
+              ? "Added to bookmarks"
+              : "Removed from bookmarks"
+          );
+        },
+      });
+
   const handleDeletePlace = async () => {
     try {
       const result = await deletePlace(place.id, userId)
@@ -70,12 +130,11 @@ export function PlaceDetail({
       } else {
         // Handle error, maybe show a toast notification
         console.error('Failed to delete place')
-        toast({   title: "Failed to delete place", });
+        toast("Failed to delete place");
       }
     } catch (error) {
-      toast({
-                title: "Failed to delete place",
-              });
+      toast( "Failed to delete place",
+              );
       console.error('Failed to delete place:', error)
     }
   }
@@ -90,15 +149,14 @@ export function PlaceDetail({
       } else {
         // Handle error
         console.error('Failed to delete image')
-        toast({
-          title: "Failed to delete image",
-        });
+        toast(
+      "Failed to delete image",
+        );
       }
     } catch (error) {
       console.error('Failed to delete image:', error)
-      toast({
-        title: "Failed to delete image",
-      });
+      toast( "Failed to delete image",
+      );
     }
   }
 
@@ -148,10 +206,8 @@ export function PlaceDetail({
 
   const handleUpdateDetails = async () => {
     if (!editedName.trim()) {
-      toast({
-        title: "Place name cannot be empty",
-        variant: "destructive",
-      });
+      toast( "Place name cannot be empty",
+     );
       return;
     }
 
@@ -169,21 +225,32 @@ export function PlaceDetail({
 
       if (!result.success) {
         setOptimisticPlace(place);
-        toast({
-          title: "Failed to update place name",
-          variant: "destructive",
-        });
+        toast( "Failed to update place name",
+        );
       }else{
-        toast({
-          title: "Place name updated",
-        });
+        toast( "Place name updated",
+        );
       }
     } catch (error) {
       setOptimisticPlace(place);
-      toast({
-        title: "Failed to update place name",
-        variant: "destructive",
-      });
+      toast( "Failed to update place name",
+       );
+    }
+  };
+
+  const handleNextImage = () => {
+    if (place.image) {
+      setCurrentImageIndex((prev) => 
+        prev === place.image!.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const handlePreviousImage = () => {
+    if (place.image) {
+      setCurrentImageIndex((prev) => 
+        prev === 0 ? place.image!.length - 1 : prev - 1
+      );
     }
   };
 
@@ -255,7 +322,18 @@ export function PlaceDetail({
             </div>
           )}
 
-          {/* ... rest of the component ... */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleBookmark(place.id)}
+              className="ml-auto"
+            >
+              <Bookmark className={`h-5 w-5 ${
+                hasUserBookMarked ? "fill-primary text-primary" : ""
+              }`} />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -364,7 +442,8 @@ export function PlaceDetail({
                   }}
                   className="absolute top-2 right-2 p-2 bg-black/70 rounded-full text-white"
                 >
-                  <X className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 text-red-500" />
+
                 </button>
               )}
             </div>
@@ -476,24 +555,50 @@ export function PlaceDetail({
         onOpenChange={() => setSelectedImage(null)}
       >
         <DialogContent className="max-w-[90vw] max-h-[90vh] p-0">
+          <div className="fixed inset-0 bg-black/80" />
           <div className="relative w-full h-[90vh]">
             {selectedImage && (
-              <Image
-                src={selectedImage}
-                alt="Full size image"
-                fill
-                className="object-contain"
-                priority
-              />
+              <>
+                <Image
+                  src={selectedImage}
+                  alt="Full size image"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePreviousImage();
+                    setSelectedImage(place.image![currentImageIndex]);
+                  }}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 p-2 rounded-full text-white hover:bg-black/70 transition-colors"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNextImage();
+                    setSelectedImage(place.image![currentImageIndex]);
+                  }}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 p-2 rounded-full text-white hover:bg-black/70 transition-colors"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+                <div className="absolute top-4 right-4 flex gap-2">
+                  
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-black/50 hover:bg-black/70 text-white"
+                    onClick={() => setSelectedImage(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white"
-              onClick={() => setSelectedImage(null)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogContent>
       </Dialog>

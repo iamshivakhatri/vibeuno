@@ -11,6 +11,8 @@ import {
   Link,
   Heart,
   Trash,
+  MoreVertical,
+  Trash2,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
@@ -21,7 +23,7 @@ import { hasUserVotedForPlace, getPlaceVoteCount } from "@/actions/user";
 import { Badge } from "@/components/ui/badge";
 import { createComment, getCommentsByPlaceId } from "@/actions/place";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteComment } from "@/actions/place";
+import { deleteComment, deletePlace } from "@/actions/place";
 import { useMutationData, useMutationDataState } from "@/hooks/useMutationData";
 import {
   voteForPlace,
@@ -35,6 +37,12 @@ import { JsonValue } from "@prisma/client/runtime/library";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { isPlaceInWishlist } from "@/actions/place";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Place = {
   id: string;
@@ -113,32 +121,23 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
       if (!place.id || !userId) return false;
       return await isPlaceInWishlist(place.id, userId);
     },
-    enabled: !!place.id && !!userId, // Prevents execution if values are missing
+    enabled: !!place.id && !!userId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
-
-
-
 
   const { data: allComments } = useQuery<Comment[]>({
     queryKey: ["all-comments", place.id, userId],
     queryFn: () => getCommentsByPlaceId(place.id, userId),
     enabled: !!place.id && !!userId,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
-
-  
-
-
-
-
-    // Optimize mutations with better error handling
-    const { mutate: handleLike } = useMutationData(
-      ["toggle-like", place.id], // Changed key to be more specific
-      (commentId: string) => toggleCommentLike({ userId, commentId }),
-      ["all-comments", place.id, userId]
-    );
-  
-
+  // Optimize mutations with better error handling
+  const { mutate: handleLike } = useMutationData(
+    ["toggle-like", place.id], // Changed key to be more specific
+    (commentId: string) => toggleCommentLike({ userId, commentId }),
+    ["all-comments", place.id, userId]
+  );
 
   const { mutate: addComment, isPending: isAddingCommentPending } =
     useMutationData(
@@ -152,7 +151,6 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
       ["all-comments", place.id, userId],
       () => setNewComment("")
     );
-
 
   const { mutate: mutateDelete, isPending: isDeletingCommentPending } =
     useMutationData(
@@ -197,11 +195,47 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
     queryFn: () => getPlaceVoteCount(place.id),
   });
 
-  const { mutate: handleBookmark } = useMutationData(
-    ["handle-bookmark"],
-    (placeId: string) => bookMarkPlace({ placeId, userId }),
-    ["wishlistStatus", place.id, userId]
-  );
+  const { mutate: handleBookmark } = useMutation({
+    mutationFn: (placeId: string) => bookMarkPlace({ placeId, userId }),
+    onMutate: async (placeId) => {
+      await queryClient.cancelQueries({
+        queryKey: ["wishlistStatus", placeId, userId],
+      });
+
+      const previousStatus = queryClient.getQueryData([
+        "wishlistStatus",
+        placeId,
+        userId,
+      ]);
+
+      // Optimistically update
+      queryClient.setQueryData(
+        ["wishlistStatus", placeId, userId],
+        !previousStatus
+      );
+
+      return { previousStatus };
+    },
+    onError: (err, placeId, context) => {
+      queryClient.setQueryData(
+        ["wishlistStatus", placeId, userId],
+        context?.previousStatus
+      );
+      toast.error("Failed to update bookmark status");
+    },
+    onSuccess: () => {
+      toast.success(
+        hasUserBookMarked
+          ? "Added to bookmarks"
+          : "Removed from bookmarks"
+      );
+    },
+  });
+
+  // Debounced bookmark handler to prevent rapid clicking
+  const handleBookmarkClick = () => {
+    handleBookmark(place.id);
+  };
 
   const { mutate: addOrRemoveVote } = useMutation({
     mutationKey: ["handle-vote"],
@@ -262,6 +296,20 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
     router.push(`/profile/${id}`);
   };
 
+  const { mutate: handleDeletePost } = useMutation({
+    mutationFn: (postId: string) => deletePlace(postId, userId),
+    onSuccess: () => {
+      toast.success("Post deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["all-posts"] });
+    },
+    onError: () => {
+      toast.error("Failed to delete post");
+    },
+  });
+
+
+
+
   return (
     <div
       key={place.id}
@@ -312,6 +360,25 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
           {place?.user?.occupation ||""}
         </p> */}
       </div>
+
+      {isCurrentUser && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="ml-auto">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={() => handleDeletePost(place.id)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Post
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
 
 
@@ -351,7 +418,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
             variant="ghost"
             size="sm"
             className="ml-auto"
-            onClick={() => handleBookmark(place.id)}
+            onClick={handleBookmarkClick}
           >
             {/* <Bookmark className="w-4 h-4" /> */}
             <Bookmark

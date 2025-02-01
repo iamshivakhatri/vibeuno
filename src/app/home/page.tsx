@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -9,6 +9,7 @@ import { getProfileFromClerk } from "@/actions/user";
 import { useUser } from "@clerk/nextjs";
 import PostCard from "@/components/post/PostCard";
 import { Place as PlaceType } from "@/components/post/index.type";
+import { PostSkeleton } from "@/components/post/PostSkeleton";
 
 import { useQuery } from "@tanstack/react-query";
 import { JsonValue } from "@prisma/client/runtime/library";
@@ -78,53 +79,54 @@ type PostCardProps = {
 export default function HomePage() {
   const [selectedFilter, setSelectedFilter] = useState("Trending");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [newComment, setNewComment] = useState("");
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
 
   const { data: profileData } = useQuery({
-    queryKey: ["profileData"],
+    queryKey: ["profileData", user?.id],
     queryFn: () => getProfileFromClerk(user?.id as string),
-    enabled: !!user?.id,
+    enabled: !!user?.id && isLoaded,
+    staleTime: Infinity,
   });
 
-  const { data: places } = useQuery({
+  const { data: places, isLoading } = useQuery({
     queryKey: ["all-posts"],
     queryFn: () => getPost(),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
-  console.log("this is the places. in the home", places);
+  const processedPlaces = useMemo(() => {
+    if (!places) return [];
+    return places.map((place) => ({
+      ...place,
+      name: place.name ?? "",
+      image: Array.isArray(place.image)
+        ? place.image.filter((img): img is string => typeof img === "string")
+        : [],
+      comments: place.comments.map((comment) => ({
+        ...comment,
+        user: {
+          ...comment.user,
+          name: comment.user.name ?? "",
+        },
+        likes: comment.likes?.length || 0,
+      })),
+    }));
+  }, [places]);
 
-  const handleComment = (placeId: string) => {
-    if (!newComment.trim()) return;
-    console.log("Adding comment to place:", placeId, newComment);
-    setNewComment("");
-  };
-
-  const processedPlaces = (places ?? []).map((place) => ({
-    ...place,
-    name: place.name ?? "",
-    image: Array.isArray(place.image)
-      ? place.image.filter((img): img is string => typeof img === "string")
-      : [],
-    comments: place.comments.map((comment) => ({
-      ...comment,
-      user: {
-        ...comment.user,
-        name: comment.user.name ?? "",
-      },
-      likes: comment.likes?.length || 0, // Convert likes array to number
-    })),
-  }));
-
-  // Filter places based on selectedCategory
-  const filteredPlaces =
-    selectedCategory === "All"
+  const filteredPlaces = useMemo(() => {
+    return selectedCategory === "All"
       ? processedPlaces
-      : (processedPlaces ?? []).filter(
+      : processedPlaces.filter(
           (place) => place.category === selectedCategory.toLowerCase()
         );
+  }, [selectedCategory, processedPlaces]);
 
-  console.log("this is the selected category", selectedCategory);
+  if (!isLoaded) {
+    return null;
+  }
 
   return (
     <div className="max-w-2xl mx-auto md:px-4 mb-8">
@@ -148,19 +150,26 @@ export default function HomePage() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-          <div className="grid gap-6 ">
-            {filteredPlaces?.map(
-              (place) =>
-                profileData?.profileUrl &&
-                profileData?.userId && (
-                  <PostCard
-                    key={place.id}
-                    place={place}
-                    profileUrl={profileData.profileUrl}
-                    clerkId={user?.id}
-                    userId={profileData.userId}
-                  />
-                )
+          <div className="grid gap-6">
+            {isLoading ? (
+              // Show multiple skeletons while loading
+              Array.from({ length: 3 }).map((_, index) => (
+                <PostSkeleton key={index} />
+              ))
+            ) : (
+              filteredPlaces?.map(
+                (place) =>
+                  profileData?.profileUrl &&
+                  profileData?.userId && (
+                    <PostCard
+                      key={place.id}
+                      place={place}
+                      profileUrl={profileData.profileUrl}
+                      clerkId={user?.id}
+                      userId={profileData.userId}
+                    />
+                  )
+              )
             )}
           </div>
         </div>
