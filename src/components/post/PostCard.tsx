@@ -438,6 +438,7 @@ const PostCard = ({ place, profileUrl, userId, clerkId }: PostCardProps) => {
           mutateDelete={mutateDelete}
           handleLike={handleLike}
           isCurrentUser={isCurrentUser}
+          userId={userId}
         />
       </div>
     </div>

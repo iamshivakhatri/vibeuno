@@ -235,6 +235,11 @@ export async function getCityData(name: string) {
 
 export async function deleteComment(commentId: string): Promise<void> {
   try {
+    await prisma.like.deleteMany({
+      where: { commentId: commentId },
+    });
+
+  
     await prisma.comment.delete({
       where: { id: commentId },
     });

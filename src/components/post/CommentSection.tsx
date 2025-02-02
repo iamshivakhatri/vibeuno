@@ -134,6 +134,7 @@ interface CommentSectionProps {
   mutateDelete: (commentId: string) => void
   handleLike: (commentId: string) => void
   isCurrentUser: boolean
+  userId: string
 }
 
 // Dummy data for testing
@@ -222,9 +223,10 @@ export type CommentType = {
   parentId: string | null
   visible: boolean
   hasUserLiked?: boolean
+
 }
 
-export function CommentSection({ place, profileUrl, handleComment, mutateDelete, handleLike, isCurrentUser }: CommentSectionProps) {
+export function CommentSection({ place, profileUrl, handleComment, mutateDelete, handleLike, isCurrentUser, userId }: CommentSectionProps) {
 
 
 // export function CommentSection({ placeId, profileUrl, isCurrentUser }: CommentSectionProps) {
@@ -232,7 +234,7 @@ export function CommentSection({ place, profileUrl, handleComment, mutateDelete,
   const [newComment, setNewComment] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  console.log("this is the place in comment section", place)
+  console.log("this is the  profileurl")
 
   
   // Get the two most recent comments
@@ -309,6 +311,7 @@ export function CommentSection({ place, profileUrl, handleComment, mutateDelete,
         mutateDelete={mutateDelete}
         handleLike={handleLike}
         isCurrentUser={isCurrentUser}
+        userId={userId}
       />
     </div>
   )
