@@ -1,18 +1,18 @@
+
+
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { getPost } from "@/actions/place";
 import { getProfileFromClerk } from "@/actions/user";
 import { useUser } from "@clerk/nextjs";
 import PostCard from "@/components/post/PostCard";
-import { Place as PlaceType } from "@/components/post/index.type";
 import { PostSkeleton } from "@/components/post/PostSkeleton";
-
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer"; 
 import { useQuery } from "@tanstack/react-query";
-import { JsonValue } from "@prisma/client/runtime/library";
 
 const FILTERS = ["Trending", "Latest", "Most Voted", "Following"];
 const CATEGORIES = [
@@ -69,17 +69,12 @@ type Comment = {
   visible: boolean;
 };
 
-type PostCardProps = {
-  place: Place;
-  profileUrl: string | null | undefined;
-  userId: string;
-  clerkId: string | undefined;
-};
-
 export default function HomePage() {
   const [selectedFilter, setSelectedFilter] = useState("Trending");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const { user, isLoaded } = useUser();
+
+  const { ref, inView } = useInView(); // Hook to detect when the user scrolls to the bottom
 
   const { data: profileData } = useQuery({
     queryKey: ["profileData", user?.id],
@@ -88,41 +83,43 @@ export default function HomePage() {
     staleTime: Infinity,
   });
 
-  const { data: places, isLoading } = useQuery({
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery({
     queryKey: ["all-posts"],
-    queryFn: () => getPost(),
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await fetch(`/api/get-posts?page=${pageParam}&limit=10`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
+      return response.json();
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < 10) return undefined; // No more pages
+      return allPages.length + 1; // Return the next page number
+    },
+    initialPageParam: 1, // Add this line
   });
 
-  const processedPlaces = useMemo(() => {
-    if (!places) return [];
-    return places.map((place) => ({
-      ...place,
-      name: place.name ?? "",
-      image: Array.isArray(place.image)
-        ? place.image.filter((img): img is string => typeof img === "string")
-        : [],
-      comments: place.comments.map((comment) => ({
-        ...comment,
-        user: {
-          ...comment.user,
-          name: comment.user.name ?? "",
-        },
-        likes: comment.likes?.length || 0,
-      })),
-    }));
-  }, [places]);
+  // Fetch the next page when the user scrolls to the bottom
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
 
   const filteredPlaces = useMemo(() => {
+    const allPlaces = data?.pages.flat() || [];
     return selectedCategory === "All"
-      ? processedPlaces
-      : processedPlaces.filter(
-          (place) => place.category === selectedCategory.toLowerCase()
+      ? allPlaces
+      : allPlaces.filter(
+          (place: Place) => place.category === selectedCategory.toLowerCase()
         );
-  }, [selectedCategory, processedPlaces]);
+  }, [selectedCategory, data]);
 
   if (!isLoaded) {
     return null;
@@ -153,23 +150,33 @@ export default function HomePage() {
           <div className="grid gap-6">
             {isLoading ? (
               // Show multiple skeletons while loading
-              Array.from({ length: 3 }).map((_, index) => (
+              Array.from({ length: 3 }).map((_, index: number) => (
                 <PostSkeleton key={index} />
               ))
             ) : (
-              filteredPlaces?.map(
-                (place) =>
-                  profileData?.profileUrl &&
-                  profileData?.userId && (
-                    <PostCard
-                      key={place.id}
-                      place={place}
-                      profileUrl={profileData.profileUrl}
-                      clerkId={user?.id}
-                      userId={profileData.userId}
-                    />
-                  )
+              filteredPlaces?.map((place: Place) =>
+                profileData?.profileUrl &&
+                profileData?.userId ? (
+                  <PostCard
+                    key={place.id}
+                    place={place}
+                    profileUrl={profileData.profileUrl}
+                    clerkId={user?.id}
+                    userId={profileData.userId}
+                  />
+                ) : null
               )
+            )}
+          </div>
+
+          {/* Load more trigger */}
+          <div ref={ref} className="text-center py-4">
+            {isFetchingNextPage ? (
+              <PostSkeleton />
+            ) : hasNextPage ? (
+              <Button onClick={() => fetchNextPage()}>Load More</Button>
+            ) : (
+              <p>No more posts to load.</p>
             )}
           </div>
         </div>

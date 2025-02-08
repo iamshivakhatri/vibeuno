@@ -500,3 +500,31 @@ export async function getUsers() {
     return [];
   }
 }
+
+export async function getSidebarUsers() {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        profileUrl: true,
+        location: true,
+        occupation: true,
+        _count: {
+          select: {
+            places: true, // Count the number of places posted by the user
+          },
+        },
+      },
+      orderBy: {
+        places: {
+          _count: "desc", // Sort by the number of places posted (descending order)
+        },
+      },
+    });
+    return users;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw new Error("Failed to fetch users");
+  }
+}

@@ -31,10 +31,17 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
     },
   });
 
-  await query.prefetchQuery({
-    queryKey: ["all-posts"],
-    queryFn: getPost,
-  });
+  // await query.prefetchQuery({
+  //   queryKey: ["all-posts"],
+  //   queryFn: getPost,
+  // });
+
+  // query.prefetchQuery({
+  //   queryKey: ["all-posts"],
+  //   queryFn: getPost,
+  // });
+
+
 
   return (
     <HydrationBoundary state={dehydrate(query)}>

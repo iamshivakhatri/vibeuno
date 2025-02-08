@@ -77,6 +77,8 @@ export async function POST(request: Request) {
       presignedData,
       placeId: updatedPlace.id,
     });
+
+    
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json(

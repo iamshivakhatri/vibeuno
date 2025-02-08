@@ -995,6 +995,75 @@ export async function getPost() {
   }
 }
 
+// export async function getPost() {
+//   try {
+//     // Let UI breathe before fetching posts
+//     await new Promise((resolve) => setTimeout(resolve, 0));
+
+//     const places = await prisma.place.findMany({
+//       select: {
+//         id: true,
+//         name: true,
+//         caption: true,
+//         description: true,
+//         imageUrl: true,
+//         image: true, // Ensure this is an array of strings
+//         city: true,
+//         category: true,
+//         numVotes: true,
+//         createdAt: true,
+//         comments: {
+//           select: {
+//             id: true,
+//             content: true,
+//             userId: true,
+//             placeId: true,
+//             createdAt: true,
+//             editedAt: true,
+//             isEdited: true,
+//             likes: {
+//               select: {
+//                 userId: true,
+//                 id: true,
+//                 createdAt: true,
+//                 commentId: true,
+//               },
+//             },
+//             reported: true,
+//             parentId: true,
+//             visible: true,
+//             user: {
+//               select: {
+//                 id: true,
+//                 name: true,
+//                 profileUrl: true,
+//                 occupation: true,
+//               },
+//             },
+//           },
+//         },
+//         user: {
+//           select: {
+//             id: true,
+//             name: true,
+//             profileUrl: true,
+//             occupation: true,
+//           },
+//         },
+//       },
+//       orderBy: {
+//         createdAt: "desc",
+//       },
+//     });
+
+//     return places;
+//   } catch (error) {
+//     console.error("Error fetching places:", error);
+//     return [];
+//   }
+// }
+
+
 
 
 
