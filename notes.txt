@@ -170,3 +170,5 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
     queryFn: () => hasUserVotedForPlace(place.id, user?.id || ''),
     enabled: !!user,
   });
+
+  postgresql://neondb_owner:lncOD3g0BNVv@ep-red-cloud-a5lfi03o-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require

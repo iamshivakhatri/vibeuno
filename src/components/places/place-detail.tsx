@@ -322,7 +322,7 @@ export function PlaceDetail({
             </div>
           )}
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <Button
               variant="ghost"
               size="icon"
@@ -333,6 +333,19 @@ export function PlaceDetail({
                 hasUserBookMarked ? "fill-primary text-primary" : ""
               }`} />
             </Button>
+
+
+             {/* Add more photos icon */}
+              {isCurrentUser && (
+                <Button
+                  onClick={() => setIsUploadModalOpen(true)}
+                  className="p-"
+                >
+                  <Camera className="w-6 h-6 hover:bg-white hover:text-black" />
+                </Button>
+              )}
+
+            
           </div>
         </div>
       </div>
@@ -527,13 +540,13 @@ export function PlaceDetail({
             <DialogTitle>Update Photos</DialogTitle>
           </DialogHeader>
           <div className="grid w-full max-w-sm items-center gap-1.5">
-            {/* <input
+            <input
               type="file"
               multiple
               accept="image/*"
               onChange={handleFileUpload}
               className="cursor-pointer"
-            /> */}
+            />
             <PhotoUpdate
               placeId={place.id}
               userId={userId}
