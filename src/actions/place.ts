@@ -97,11 +97,69 @@ export async function populateCities() {
   }
 }
 
+// export async function addPlace(formData: {
+//   name?: string;
+//   description: string;
+//   imageUrl: string;
+//   clerkId?: string; // clerkId is received as input
+//   state: string;
+//   city: string;
+//   category: string;
+// }) {
+//   try {
+//     // Fetch user based on clerkId
+//     const user = await prisma.user.findUnique({
+//       where: { clerkId: formData.clerkId },
+//     });
+
+//     if (!user) {
+//       throw new Error("User not found for the provided clerkId");
+//     }
+
+//     // Ensure the city exists or create it
+//     const city = await prisma.city.upsert({
+//       where: {
+//         name_state_country: {
+//           name: formData.city,
+//           state: formData.state,
+//           country: "USA", // Replace with dynamic country if needed
+//         },
+//       },
+//       create: {
+//         name: formData.city,
+//         state: formData.state,
+//         country: "USA", // Replace with dynamic country if needed
+//         description: `Community for ${formData.city}, ${formData.state}`, // Optional: You can customize this
+//         coverImage: `https://source.unsplash.com/featured/?${formData.city}`, // Optional: You can customize this
+//       },
+//       update: {}, // No updates needed, as `upsert` ensures it's created if missing
+//     });
+
+//     // Remove clerkId from formData and add the userId and cityId to create the new place
+//     const newData = {
+//       ...formData,
+//       userId: user.id,
+//       cityId: city.id, // Associate the place with the city's ID
+//     };
+//     delete newData.clerkId; // Optionally remove clerkId if it's in the formData
+
+//     // Create the place
+//     const place = await prisma.place.create({
+//       data: newData, // Use the modified data with userId and cityId
+//     });
+
+//     return place;
+//   } catch (error) {
+//     console.error("Error adding place:", error);
+//     throw error;
+//   }
+// }
+
 export async function addPlace(formData: {
   name?: string;
   description: string;
   imageUrl: string;
-  clerkId?: string; // clerkId is received as input
+  clerkId?: string;
   state: string;
   city: string;
   category: string;
@@ -116,39 +174,52 @@ export async function addPlace(formData: {
       throw new Error("User not found for the provided clerkId");
     }
 
-    // Ensure the city exists or create it
-    const city = await prisma.city.upsert({
+    // First, try to find the existing city
+    let city = await prisma.city.findFirst({
       where: {
-        name_state_country: {
-          name: formData.city,
-          state: formData.state,
-          country: "USA", // Replace with dynamic country if needed
-        },
-      },
-      create: {
         name: formData.city,
         state: formData.state,
-        country: "USA", // Replace with dynamic country if needed
-        description: `Community for ${formData.city}, ${formData.state}`, // Optional: You can customize this
-        coverImage: `https://source.unsplash.com/featured/?${formData.city}`, // Optional: You can customize this
+        country: "USA",
       },
-      update: {}, // No updates needed, as `upsert` ensures it's created if missing
     });
 
-    // Remove clerkId from formData and add the userId and cityId to create the new place
-    const newData = {
-      ...formData,
-      userId: user.id,
-      cityId: city.id, // Associate the place with the city's ID
-    };
-    delete newData.clerkId; // Optionally remove clerkId if it's in the formData
+    // If city doesn't exist, create it
+    if (!city) {
+      city = await prisma.city.create({
+        data: {
+          name: formData.city,
+          state: formData.state,
+          country: "USA",
+          description: `Discover the beauty and attractions of ${formData.city}, ${formData.state}`,
+          coverImage: `https://source.unsplash.com/featured/?${encodeURIComponent(formData.city)}`,
+        },
+      });
+    }
 
-    // Create the place
+    // Prepare place data
+    const placeData = {
+      name: formData.name,
+      description: formData.description,
+      imageUrl: formData.imageUrl,
+      state: formData.state,
+      city: formData.city,
+      category: formData.category,
+      userId: user.id,
+      cityId: city.id,
+      country: "USA"
+    };
+
+    // Create the place with the city relationship
     const place = await prisma.place.create({
-      data: newData, // Use the modified data with userId and cityId
+      data: placeData,
+      include: {
+        cityName: true, // Include the related city data in the response
+        user: true      // Include the user data if needed
+      }
     });
 
     return place;
+
   } catch (error) {
     console.error("Error adding place:", error);
     throw error;
